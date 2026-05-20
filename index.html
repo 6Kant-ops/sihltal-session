@@ -1,0 +1,2129 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sihltal Session — Musik im Tal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --black: #0a0a0a;
+    --deep: #111110;
+    --surface: #1a1917;
+    --card: #222120;
+    --border: rgba(255,255,255,0.08);
+    --gold: #c9a84c;
+    --gold-light: #e4c87a;
+    --gold-dim: rgba(201,168,76,0.15);
+    --white: #f5f2ed;
+    --muted: rgba(245,242,237,0.5);
+    --accent: #7ecfb3;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 400;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 1.25rem 2.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.4s, backdrop-filter 0.4s;
+  }
+  nav.scrolled {
+    background: rgba(10,10,10,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 0.5px solid var(--border);
+  }
+  .nav-logo {
+    font-family: 'Playfair Display', serif;
+    font-weight: 900;
+    font-size: 1.3rem;
+    letter-spacing: 0.02em;
+    color: var(--gold);
+    text-decoration: none;
+  }
+  .nav-logo span { color: var(--white); font-weight: 700; font-style: italic; }
+  .nav-links { display: flex; gap: 2rem; list-style: none; }
+  .nav-links a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--gold); }
+  .nav-cta {
+    background: transparent;
+    border: 1px solid var(--gold);
+    color: var(--gold) !important;
+    padding: 0.5rem 1.25rem;
+    border-radius: 2px;
+    font-size: 0.8rem !important;
+    letter-spacing: 0.1em !important;
+    transition: background 0.2s, color 0.2s !important;
+  }
+  .nav-cta:hover { background: var(--gold) !important; color: var(--black) !important; }
+
+  .hamburger { display: none; cursor: pointer; flex-direction: column; gap: 5px; }
+  .hamburger span { display: block; width: 24px; height: 1.5px; background: var(--white); transition: 0.3s; }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    height: 100vh;
+    min-height: 600px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    overflow: hidden;
+  }
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background-image: url('https://images.pexels.com/photos/1763075/pexels-photo-1763075.jpeg?auto=compress&cs=tinysrgb&w=1920');
+    background-size: cover;
+    background-position: center 40%;
+    will-change: transform;
+  }
+  .hero-bg::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(to bottom, rgba(10,10,10,0.55) 0%, rgba(10,10,10,0.3) 40%, rgba(10,10,10,0.75) 100%),
+      radial-gradient(ellipse 80% 60% at 50% 80%, rgba(201,168,76,0.08) 0%, transparent 70%);
+  }
+  .hero-lines {
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent calc(100%/12 - 0.5px),
+      rgba(255,255,255,0.02) calc(100%/12 - 0.5px),
+      rgba(255,255,255,0.02) calc(100%/12)
+    );
+    pointer-events: none;
+  }
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 900px;
+    padding: 0 2rem;
+  }
+  .hero-eyebrow {
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.3s forwards;
+  }
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 900;
+    font-size: clamp(3.5rem, 8vw, 7rem);
+    line-height: 1.0;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.5s forwards;
+  }
+  .hero h1 em {
+    font-style: italic;
+    color: var(--gold);
+  }
+  .hero-sub {
+    font-size: clamp(1rem, 2vw, 1.2rem);
+    color: var(--muted);
+    max-width: 500px;
+    margin: 0 auto 2.5rem;
+    font-weight: 300;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.7s forwards;
+  }
+  .hero-btns {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.9s forwards;
+  }
+  .btn-primary {
+    background: var(--gold);
+    color: var(--black);
+    padding: 0.875rem 2rem;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.9rem;
+    letter-spacing: 0.05em;
+    border-radius: 2px;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .btn-primary:hover { background: var(--gold-light); transform: translateY(-2px); }
+  .btn-outline {
+    border: 1px solid rgba(255,255,255,0.3);
+    color: var(--white);
+    padding: 0.875rem 2rem;
+    text-decoration: none;
+    font-weight: 400;
+    font-size: 0.9rem;
+    letter-spacing: 0.05em;
+    border-radius: 2px;
+    transition: border-color 0.2s, color 0.2s, transform 0.2s;
+  }
+  .btn-outline:hover { border-color: var(--white); transform: translateY(-2px); }
+
+  .hero-scroll {
+    position: absolute;
+    bottom: 2.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 1.2s forwards;
+  }
+  .hero-scroll span { font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); }
+  .scroll-line {
+    width: 1px;
+    height: 50px;
+    background: linear-gradient(to bottom, var(--gold), transparent);
+    animation: scrollPulse 2s infinite;
+  }
+
+  /* ── SECTION BASE ── */
+  section { position: relative; }
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
+
+  .section-label {
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1rem;
+  }
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-weight: 900;
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+  .section-title em { font-style: italic; color: var(--gold); }
+
+  /* ── PARALLAX BAND ── */
+  .parallax-band {
+    position: relative;
+    height: 380px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .parallax-inner {
+    position: absolute;
+    inset: -80px 0;
+    background-size: cover;
+    background-position: center;
+    will-change: transform;
+  }
+  #parallax1 {
+    background-image:
+      linear-gradient(to bottom, rgba(10,10,10,0.6), rgba(10,10,10,0.35), rgba(10,10,10,0.75)),
+      url('https://images.pexels.com/photos/1105666/pexels-photo-1105666.jpeg?auto=compress&cs=tinysrgb&w=1920');
+  }
+  #parallax2 {
+    background-image:
+      linear-gradient(to bottom, rgba(10,10,10,0.65), rgba(10,10,10,0.3), rgba(10,10,10,0.75)),
+      url('https://images.pexels.com/photos/167636/pexels-photo-167636.jpeg?auto=compress&cs=tinysrgb&w=1920');
+  }
+  .parallax-dots {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(201,168,76,0.4) 1px, transparent 1px);
+    background-size: 80px 80px;
+    opacity: 0.3;
+  }
+  .parallax-text {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    padding: 0 2rem;
+  }
+  .parallax-text h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.5rem, 5vw, 4.5rem);
+    font-weight: 900;
+    font-style: italic;
+    color: var(--gold-light);
+    letter-spacing: -0.02em;
+    text-shadow: 0 0 80px rgba(201,168,76,0.3);
+  }
+  .parallax-text p {
+    color: rgba(245,242,237,0.6);
+    font-size: 1.1rem;
+    font-weight: 300;
+    margin-top: 0.75rem;
+  }
+
+  /* ── ÜBER UNS ── */
+  .about { padding: 8rem 0; background: var(--deep); }
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6rem;
+    align-items: center;
+  }
+  .about-text p {
+    color: rgba(245,242,237,0.65);
+    font-size: 1.05rem;
+    line-height: 1.8;
+    margin-top: 1.5rem;
+    font-weight: 300;
+  }
+  .about-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-top: 3rem;
+  }
+  .stat {
+    border-top: 1px solid var(--border);
+    padding-top: 1.25rem;
+  }
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.8rem;
+    font-weight: 900;
+    color: var(--gold);
+    line-height: 1;
+  }
+  .stat-label { font-size: 0.8rem; color: var(--muted); margin-top: 0.4rem; letter-spacing: 0.05em; }
+  .about-visual {
+    position: relative;
+    aspect-ratio: 4/5;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .about-visual img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+  }
+  .about-visual::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(10,10,10,0.5) 0%, transparent 50%);
+  }
+
+  /* ── KONZERTE ── */
+  .concerts { padding: 8rem 0; background: var(--black); }
+  .concerts-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 4rem; }
+  .concerts-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+  .concert-card {
+    background: var(--surface);
+    padding: 2rem;
+    transition: background 0.3s;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    position: relative;
+    overflow: hidden;
+  }
+  .concert-card::before {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--gold);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s;
+  }
+  .concert-card:hover { background: var(--card); }
+  .concert-card:hover::before { transform: scaleX(1); }
+  .concert-date {
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1rem;
+    font-weight: 500;
+  }
+  .concert-genre {
+    display: inline-block;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border: 0.5px solid var(--border);
+    padding: 0.2rem 0.6rem;
+    border-radius: 1px;
+    margin-bottom: 1rem;
+  }
+  .concert-card h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
+  }
+  .concert-venue {
+    font-size: 0.85rem;
+    color: var(--muted);
+    font-weight: 300;
+  }
+  .concert-venue svg { vertical-align: middle; margin-right: 4px; opacity: 0.5; }
+  .concert-thumb {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+    margin-bottom: 1.25rem;
+    border-radius: 2px;
+    filter: brightness(0.85) saturate(0.9);
+    transition: filter 0.4s;
+  }
+  .concert-card:hover .concert-thumb { filter: brightness(1) saturate(1.1); }
+  .featured-badge {
+    position: absolute;
+    top: 1.5rem; right: 1.5rem;
+    background: var(--gold);
+    color: var(--black);
+    font-size: 0.6rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 0.25rem 0.6rem;
+    border-radius: 1px;
+  }
+  .card-tap-hint {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: linear-gradient(to top, rgba(201,168,76,0.18), transparent);
+    color: var(--gold);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-align: center;
+    padding: 0.6rem;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+  }
+  .concert-card:hover .card-tap-hint { opacity: 1; }
+
+  /* ── KONZERT MODAL ── */
+  #konzertModal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 500;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+  #konzertModal.open { display: flex; }
+  .modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(6px);
+    cursor: pointer;
+  }
+  .modal-box {
+    position: relative;
+    z-index: 2;
+    background: var(--surface);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 6px;
+    width: 100%;
+    max-width: 580px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalIn 0.3s ease;
+  }
+  @keyframes modalIn {
+    from { opacity: 0; transform: translateY(20px) scale(0.97); }
+    to   { opacity: 1; transform: none; }
+  }
+  .modal-img {
+    width: 100%;
+    height: 240px;
+    object-fit: cover;
+    display: block;
+    border-radius: 6px 6px 0 0;
+  }
+  .modal-img-placeholder {
+    width: 100%;
+    height: 180px;
+    background: var(--card);
+    border-radius: 6px 6px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+  }
+  .modal-body { padding: 2rem; }
+  .modal-close {
+    position: absolute;
+    top: 1rem; right: 1rem;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.6);
+    border: none;
+    color: #fff;
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s;
+    z-index: 3;
+  }
+  .modal-close:hover { background: rgba(0,0,0,0.9); }
+  .modal-featured { display: inline-block; background: var(--gold); color: var(--black); font-size: 0.65rem; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; padding: 0.2rem 0.7rem; border-radius: 1px; margin-bottom: 0.75rem; }
+  .modal-date { font-size: 0.8rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); font-weight: 500; margin-bottom: 0.5rem; }
+  .modal-title { font-family: 'Playfair Display', serif; font-size: clamp(1.5rem, 4vw, 2rem); font-weight: 900; line-height: 1.15; margin-bottom: 0.75rem; }
+  .modal-genre-badge { display: inline-block; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); border: 0.5px solid var(--border); padding: 0.25rem 0.7rem; border-radius: 1px; margin-bottom: 1.25rem; }
+  .modal-meta { display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 1.5rem; }
+  .modal-meta-row { display: flex; align-items: center; gap: 0.6rem; font-size: 0.95rem; color: rgba(245,242,237,0.7); }
+  .modal-meta-row svg { flex-shrink: 0; color: var(--gold); }
+  .modal-desc { font-size: 1rem; color: rgba(245,242,237,0.65); line-height: 1.75; font-weight: 300; margin-bottom: 2rem; border-top: 0.5px solid var(--border); padding-top: 1.25rem; }
+  .modal-ticket-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--gold);
+    color: var(--black);
+    padding: 0.9rem 2rem;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1rem;
+    letter-spacing: 0.05em;
+    border-radius: 3px;
+    transition: background 0.2s, transform 0.15s;
+    width: 100%;
+    justify-content: center;
+  }
+  .modal-ticket-btn:hover { background: var(--gold-light); transform: translateY(-1px); }
+  .modal-no-ticket { text-align: center; color: var(--muted); font-size: 0.9rem; padding: 0.75rem; border: 0.5px dashed var(--border); border-radius: 3px; }
+  .modal-share-row { display: flex; gap: 0.75rem; margin-top: 1rem; }
+  .modal-share-btn {
+    flex: 1;
+    display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;
+    padding: 0.7rem 1rem;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--muted);
+    font-size: 0.85rem;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+    text-decoration: none;
+  }
+  .modal-share-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .modal-share-btn.copied { border-color: var(--accent); color: var(--accent); }
+  .concerts-cta { text-align: center; margin-top: 3rem; }
+
+  /* ── MUSIKRICHTUNGEN ── */
+  .genres { padding: 8rem 0; background: var(--deep); overflow: hidden; }
+  .genres-marquee-wrap { position: relative; margin: 3rem 0; overflow: hidden; }
+  .genres-marquee {
+    display: flex;
+    gap: 0;
+    white-space: nowrap;
+    animation: marquee 20s linear infinite;
+  }
+  .genres-marquee:hover { animation-play-state: paused; }
+  .genre-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0 2.5rem;
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.5rem, 3vw, 2.2rem);
+    font-weight: 700;
+    color: rgba(245,242,237,0.15);
+    white-space: nowrap;
+    transition: color 0.3s;
+    cursor: default;
+  }
+  .genre-tag:hover { color: var(--gold); }
+  .genre-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); opacity: 0.4; flex-shrink: 0; }
+  .genres-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--border); margin-top: 4rem; }
+  .genre-item {
+    background: var(--surface);
+    padding: 2rem 1.5rem;
+    text-align: center;
+    transition: background 0.3s;
+  }
+  .genre-item:hover { background: var(--card); }
+  .genre-item-icon { font-size: 2rem; margin-bottom: 0.75rem; }
+  .genre-item h4 { font-size: 0.9rem; font-weight: 500; letter-spacing: 0.05em; color: var(--white); }
+  .genre-item p { font-size: 0.75rem; color: var(--muted); margin-top: 0.4rem; line-height: 1.5; }
+
+  .concert-desc {
+    font-size: 0.85rem;
+    color: var(--muted);
+    font-weight: 300;
+    line-height: 1.6;
+    margin-top: 0.5rem;
+    margin-bottom: 0.75rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .concert-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 1rem;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+  .ticket-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: var(--gold);
+    color: var(--black);
+    padding: 0.5rem 1.1rem;
+    border-radius: 2px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: background 0.2s, transform 0.15s;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .ticket-btn:hover { background: var(--gold-light); transform: translateY(-1px); }
+  .location { padding: 8rem 0; background: var(--black); }
+  .location-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: start; }
+  .location-map {
+    aspect-ratio: 1;
+    background: var(--surface);
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .map-svg-wrap { width: 100%; height: 100%; }
+  .location-info { padding-top: 1rem; }
+  .location-info p { color: var(--muted); font-weight: 300; margin-top: 1.5rem; line-height: 1.8; font-size: 1.05rem; }
+  .location-details { margin-top: 2.5rem; display: flex; flex-direction: column; gap: 1rem; }
+  .location-detail {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.9rem;
+    color: var(--muted);
+  }
+  .location-detail svg { flex-shrink: 0; color: var(--gold); }
+
+  /* ── NEWSLETTER ── */
+  .newsletter {
+    padding: 7rem 0;
+    background: var(--surface);
+    text-align: center;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .newsletter .section-title { margin-bottom: 0.75rem; }
+  .newsletter p { color: var(--muted); font-weight: 300; font-size: 1rem; margin-bottom: 2.5rem; }
+  .newsletter-form { display: flex; gap: 0; max-width: 480px; margin: 0 auto; }
+  .newsletter-form input {
+    flex: 1;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    border-right: none;
+    color: var(--white);
+    padding: 0.875rem 1.25rem;
+    font-size: 0.95rem;
+    font-family: 'DM Sans', sans-serif;
+    outline: none;
+    border-radius: 2px 0 0 2px;
+    transition: border-color 0.2s;
+  }
+  .newsletter-form input::placeholder { color: rgba(255,255,255,0.25); }
+  .newsletter-form input:focus { border-color: var(--gold); }
+  .newsletter-form button {
+    background: var(--gold);
+    border: none;
+    color: var(--black);
+    padding: 0.875rem 1.5rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    border-radius: 0 2px 2px 0;
+    transition: background 0.2s;
+    white-space: nowrap;
+  }
+  .newsletter-form button:hover { background: var(--gold-light); }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 4rem 0 2.5rem;
+    background: var(--deep);
+    border-top: 1px solid var(--border);
+  }
+  .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 4rem; margin-bottom: 3rem; }
+  .footer-brand .nav-logo { display: block; font-size: 1.5rem; margin-bottom: 1rem; }
+  .footer-brand p { color: var(--muted); font-size: 0.9rem; line-height: 1.7; font-weight: 300; max-width: 280px; }
+  .footer-social { display: flex; gap: 0.75rem; margin-top: 1.5rem; }
+  .social-btn {
+    width: 36px; height: 36px;
+    border: 0.5px solid var(--border);
+    border-radius: 2px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted);
+    text-decoration: none;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .social-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .footer-col h5 {
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1.25rem;
+  }
+  .footer-col ul { list-style: none; }
+  .footer-col ul li { margin-bottom: 0.65rem; }
+  .footer-col ul a { color: var(--muted); text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+  .footer-col ul a:hover { color: var(--white); }
+  .footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 2rem;
+    border-top: 0.5px solid var(--border);
+    color: rgba(245,242,237,0.3);
+    font-size: 0.8rem;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes scrollPulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+  }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: none;
+  }
+  .reveal-delay-1 { transition-delay: 0.1s; }
+  .reveal-delay-2 { transition-delay: 0.2s; }
+  .reveal-delay-3 { transition-delay: 0.3s; }
+
+  /* ── MOBILE ── */
+  /* ── ARCHIV ── */
+  .archiv { padding: 8rem 0; background: var(--deep); }
+  .archiv-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2.5rem; }
+
+  .archiv-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 3rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .archiv-filters { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .filter-btn {
+    padding: 0.45rem 1rem;
+    border: 0.5px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .filter-btn:hover { border-color: rgba(255,255,255,0.3); color: var(--white); }
+  .filter-btn.active { background: var(--gold); color: var(--black); border-color: var(--gold); }
+
+  .archiv-sort { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+  .sort-label { font-size: 0.75rem; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; margin-right: 0.25rem; white-space: nowrap; }
+  .sort-btn {
+    padding: 0.4rem 0.875rem;
+    border: 0.5px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 500;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .sort-btn:hover { border-color: rgba(255,255,255,0.3); color: var(--white); }
+  .sort-btn.active { border-color: var(--gold); color: var(--gold); }
+
+  .archiv-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1px;
+    background: var(--border);
+  }
+  .archiv-card {
+    background: var(--black);
+    padding: 0;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.25s;
+    display: flex;
+    flex-direction: column;
+  }
+  .archiv-card:hover { background: var(--surface); }
+  .archiv-card-img {
+    width: 100%;
+    height: 130px;
+    object-fit: cover;
+    filter: grayscale(60%) brightness(0.7);
+    transition: filter 0.4s;
+    display: block;
+  }
+  .archiv-card:hover .archiv-card-img { filter: grayscale(20%) brightness(0.85); }
+  .archiv-card-body { padding: 1.25rem 1.5rem 1.5rem; flex: 1; display: flex; flex-direction: column; }
+  .archiv-card-date {
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(201,168,76,0.6);
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+  }
+  .archiv-card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    line-height: 1.25;
+    color: rgba(245,242,237,0.75);
+    margin-bottom: 0.4rem;
+    transition: color 0.2s;
+  }
+  .archiv-card:hover .archiv-card-title { color: var(--white); }
+  .archiv-card-genre {
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border: 0.5px solid rgba(255,255,255,0.06);
+    display: inline-block;
+    padding: 0.2rem 0.5rem;
+    border-radius: 1px;
+    margin-bottom: 0.75rem;
+  }
+  .archiv-card-venue {
+    font-size: 0.8rem;
+    color: rgba(245,242,237,0.3);
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .archiv-card-venue svg { opacity: 0.4; flex-shrink: 0; }
+  .archiv-past-label {
+    position: absolute;
+    top: 0.75rem; right: 0.75rem;
+    background: rgba(0,0,0,0.6);
+    color: rgba(245,242,237,0.4);
+    font-size: 0.6rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.5rem;
+    border-radius: 1px;
+  }
+  .archiv-empty {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--muted);
+    font-size: 1rem;
+  }
+
+  /* Archive card animation */
+  .archiv-card { opacity: 0; transform: translateY(16px); transition: opacity 0.35s ease, transform 0.35s ease, background 0.25s; }
+  .archiv-card.visible { opacity: 1; transform: none; }
+
+  @media(max-width:700px) {
+    .archiv-controls { flex-direction: column; align-items: flex-start; }
+    .archiv-sort { width: 100%; }
+    .archiv-grid { grid-template-columns: 1fr; }
+  }
+    .nav-links { display: none; }
+    .hamburger { display: flex; }
+    nav { padding: 1.25rem 1.5rem; }
+
+    .about-grid,
+    .location-grid { grid-template-columns: 1fr; gap: 3rem; }
+    .about-visual { aspect-ratio: 3/2; }
+
+    .concerts-grid { grid-template-columns: 1fr; }
+    .concerts-header { flex-direction: column; align-items: flex-start; gap: 1.5rem; }
+
+    .genres-grid { grid-template-columns: repeat(2, 1fr); }
+
+    .footer-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+    .footer-bottom { flex-direction: column; gap: 1rem; text-align: center; }
+
+    .newsletter-form { flex-direction: column; }
+    .newsletter-form input { border-right: 1px solid var(--border); border-bottom: none; border-radius: 2px 2px 0 0; }
+    .newsletter-form button { border-radius: 0 0 2px 2px; }
+  }
+  @media (max-width: 600px) {
+    .about-stats { grid-template-columns: 1fr 1fr; }
+    .genres-grid { grid-template-columns: 1fr 1fr; }
+    .hero h1 { font-size: clamp(2.8rem, 12vw, 4rem); }
+    section { padding: 5rem 0; }
+    .about, .concerts, .genres, .location { padding: 5rem 0; }
+  }
+
+  /* Mobile menu */
+  .mobile-menu {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(10,10,10,0.98);
+    z-index: 99;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+  }
+  .mobile-menu.open { display: flex; }
+  .mobile-menu a {
+    color: var(--white);
+    text-decoration: none;
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    transition: color 0.2s;
+  }
+  .mobile-menu a:hover { color: var(--gold); }
+  .mobile-close {
+    position: absolute;
+    top: 1.5rem; right: 1.5rem;
+    background: none;
+    border: none;
+    color: var(--white);
+    font-size: 2rem;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="navbar">
+  <a href="#" class="nav-logo">Sihltal <span>Session</span></a>
+  <ul class="nav-links">
+    <li><a href="#konzerte">Konzerte</a></li>
+    <li><a href="#ueber-uns">Über uns</a></li>
+    <li><a href="#musik">Musik</a></li>
+    <li><a href="#location">Location</a></li>
+    <li><a href="#archiv">Archiv</a></li>
+    <li><a href="#kontakt" class="nav-cta">Kontakt</a></li>
+  </ul>
+  <div class="hamburger" id="hamburger" aria-label="Menü öffnen">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+  <button class="mobile-close" id="menuClose">✕</button>
+  <a href="#konzerte" onclick="closeMobileMenu()">Konzerte</a>
+  <a href="#ueber-uns" onclick="closeMobileMenu()">Über uns</a>
+  <a href="#archiv" onclick="closeMobileMenu()">Archiv</a>
+  <a href="#musik" onclick="closeMobileMenu()">Musik</a>
+  <a href="#location" onclick="closeMobileMenu()">Location</a>
+  <a href="#kontakt" onclick="closeMobileMenu()">Kontakt</a>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg" id="heroBg"></div>
+  <div class="hero-lines"></div>
+  <div class="hero-content">
+    <p class="hero-eyebrow">Sihltal · Kanton Zürich</p>
+    <h1>Musik<br><em>lebt</em> im Tal</h1>
+    <p class="hero-sub">Livekonzerte aller Genres in der Kulturschachtle Adliswil — mitten im Sihltal.</p>
+    <div class="hero-btns">
+      <a href="#konzerte" class="btn-primary">Nächste Konzerte</a>
+      <a href="#ueber-uns" class="btn-outline">Mehr erfahren</a>
+    </div>
+  </div>
+  <div class="hero-scroll">
+    <span>Scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="about" id="ueber-uns">
+  <div class="container">
+    <div class="about-grid">
+      <div class="about-text reveal">
+        <p class="section-label">Über den Verein</p>
+        <h2 class="section-title">Musik für <em>alle</em> — in der Kulturschachtle</h2>
+        <p>Die Sihltal Session ist ein gemeinnütziger Kulturverein mit Heimat in der <strong>Kulturschachtle Adliswil</strong>. Seit Jahren bringen wir Livemusik aller Genres ins Sihltal — von intimen Soloabenden bis zu ausgelassenen Bandnächten.</p>
+        <p>Wir glauben daran, dass Musik Menschen verbindet. Die Kulturschachtle ist unser Zuhause: ein lebendiger Kulturort mitten in Adliswil, wo jeder Abend seinen eigenen Charakter hat.</p>
+        <div class="about-stats">
+          <div class="stat">
+            <div class="stat-num">12+</div>
+            <div class="stat-label">Jahre Erfahrung</div>
+          </div>
+          <div class="stat">
+            <div class="stat-num">60+</div>
+            <div class="stat-label">Konzerte pro Jahr</div>
+          </div>
+          <div class="stat">
+            <div class="stat-num">200+</div>
+            <div class="stat-label">Aufgetretene Bands</div>
+          </div>
+          <div class="stat">
+            <div class="stat-num">8k+</div>
+            <div class="stat-label">Besucher jährlich</div>
+          </div>
+        </div>
+      </div>
+      <div class="about-visual reveal reveal-delay-2">
+        <img src="https://images.pexels.com/photos/995301/pexels-photo-995301.jpeg?auto=compress&cs=tinysrgb&w=900" alt="Konzert im Freien, Publikum und Bühne" loading="lazy">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PARALLAX BAND 1 -->
+<div class="parallax-band">
+  <div class="parallax-inner" id="parallax1"></div>
+  <div class="parallax-dots"></div>
+  <div class="parallax-text">
+    <h2>"Musik in der Schachtle"</h2>
+    <p>Livekonzerte aller Genres — mitten in Adliswil</p>
+  </div>
+</div>
+
+<!-- KONZERTE -->
+<section class="concerts" id="konzerte">
+  <div class="container">
+    <div class="concerts-header reveal">
+      <div>
+        <p class="section-label">Programm 2025</p>
+        <h2 class="section-title">Nächste <em>Konzerte</em></h2>
+      </div>
+      <a href="#" class="btn-outline" style="white-space:nowrap">Alle Konzerte →</a>
+    </div>
+    <div class="concerts-grid reveal" id="concertGrid">
+    </div>
+    <div class="concerts-cta reveal">
+      <a href="#newsletter" class="btn-outline" style="display:inline-block; margin-top: 2rem;">Newsletter abonnieren für Updates</a>
+    </div>
+  </div>
+</section>
+
+<!-- PARALLAX BAND 2 -->
+<div class="parallax-band">
+  <div class="parallax-inner" id="parallax2"></div>
+  <div class="parallax-dots"></div>
+  <div class="parallax-text">
+    <h2>Jede Nacht <em>einzigartig</em></h2>
+    <p>Kein Konzert gleicht dem anderen</p>
+  </div>
+</div>
+
+<!-- ARCHIV -->
+<section class="archiv" id="archiv">
+  <div class="container">
+    <div class="archiv-header reveal">
+      <div>
+        <p class="section-label">Rückblick</p>
+        <h2 class="section-title">Vergangene <em>Konzerte</em></h2>
+      </div>
+    </div>
+
+    <!-- Filter & Sort Controls -->
+    <div class="archiv-controls reveal">
+      <div class="archiv-filters" id="archivGenreFilters">
+        <button class="filter-btn active" data-genre="alle" onclick="setGenreFilter('alle')">Alle</button>
+      </div>
+      <div class="archiv-sort">
+        <span class="sort-label">Sortieren:</span>
+        <button class="sort-btn active" data-sort="datum-neu" onclick="setSort('datum-neu')">Neueste zuerst</button>
+        <button class="sort-btn" data-sort="datum-alt" onclick="setSort('datum-alt')">Älteste zuerst</button>
+        <button class="sort-btn" data-sort="name" onclick="setSort('name')">A – Z</button>
+      </div>
+    </div>
+
+    <!-- Archive Grid -->
+    <div class="archiv-grid" id="archivGrid"></div>
+    <div id="archivEmpty" class="archiv-empty" style="display:none">
+      <div style="font-size:2.5rem; margin-bottom:1rem;">🎵</div>
+      <p>Keine vergangenen Konzerte in dieser Kategorie.</p>
+    </div>
+  </div>
+</section>
+
+<!-- GENRES -->
+<section class="genres" id="musik">
+  <div class="container">
+    <div class="reveal" style="text-align: center;">
+      <p class="section-label">Alle Genres willkommen</p>
+      <h2 class="section-title">Musik <em>ohne Grenzen</em></h2>
+    </div>
+  </div>
+  <div class="genres-marquee-wrap" aria-hidden="true">
+    <div class="genres-marquee" id="marquee">
+      <span class="genre-tag">Jazz <span class="genre-dot"></span></span>
+      <span class="genre-tag">Rock <span class="genre-dot"></span></span>
+      <span class="genre-tag">Folk <span class="genre-dot"></span></span>
+      <span class="genre-tag">Electronic <span class="genre-dot"></span></span>
+      <span class="genre-tag">Blues <span class="genre-dot"></span></span>
+      <span class="genre-tag">Klassik <span class="genre-dot"></span></span>
+      <span class="genre-tag">World Music <span class="genre-dot"></span></span>
+      <span class="genre-tag">Indie <span class="genre-dot"></span></span>
+      <span class="genre-tag">Soul <span class="genre-dot"></span></span>
+      <span class="genre-tag">R&B <span class="genre-dot"></span></span>
+      <span class="genre-tag">Reggae <span class="genre-dot"></span></span>
+      <span class="genre-tag">Experimental <span class="genre-dot"></span></span>
+      <!-- duplicate for seamless loop -->
+      <span class="genre-tag">Jazz <span class="genre-dot"></span></span>
+      <span class="genre-tag">Rock <span class="genre-dot"></span></span>
+      <span class="genre-tag">Folk <span class="genre-dot"></span></span>
+      <span class="genre-tag">Electronic <span class="genre-dot"></span></span>
+      <span class="genre-tag">Blues <span class="genre-dot"></span></span>
+      <span class="genre-tag">Klassik <span class="genre-dot"></span></span>
+      <span class="genre-tag">World Music <span class="genre-dot"></span></span>
+      <span class="genre-tag">Indie <span class="genre-dot"></span></span>
+      <span class="genre-tag">Soul <span class="genre-dot"></span></span>
+      <span class="genre-tag">R&B <span class="genre-dot"></span></span>
+      <span class="genre-tag">Reggae <span class="genre-dot"></span></span>
+      <span class="genre-tag">Experimental <span class="genre-dot"></span></span>
+    </div>
+  </div>
+  <div class="container">
+    <div class="genres-grid reveal">
+      <div class="genre-item">
+        <div class="genre-item-icon">🎷</div>
+        <h4>Jazz & Soul</h4>
+        <p>Swingend, improvisiert, lebendig</p>
+      </div>
+      <div class="genre-item">
+        <div class="genre-item-icon">🎸</div>
+        <h4>Rock & Indie</h4>
+        <p>Energie pur, rau und ehrlich</p>
+      </div>
+      <div class="genre-item">
+        <div class="genre-item-icon">🌿</div>
+        <h4>Folk & Acoustic</h4>
+        <p>Nah an der Natur, nah am Herz</p>
+      </div>
+      <div class="genre-item">
+        <div class="genre-item-icon">🌍</div>
+        <h4>World & Fusion</h4>
+        <p>Klänge aus allen Kulturen</p>
+      </div>
+      <div class="genre-item">
+        <div class="genre-item-icon">🎻</div>
+        <h4>Klassik & Kammer</h4>
+        <p>Timeless, elegant, bewegend</p>
+      </div>
+      <div class="genre-item">
+        <div class="genre-item-icon">🔊</div>
+        <h4>Electronic</h4>
+        <p>Klang als Experiment und Kunst</p>
+      </div>
+      <div class="genre-item">
+        <div class="genre-item-icon">🎵</div>
+        <h4>Blues & Gospel</h4>
+        <p>Seele, Gefühl, Authentizität</p>
+      </div>
+      <div class="genre-item">
+        <div class="genre-item-icon">✨</div>
+        <h4>& vieles mehr</h4>
+        <p>Offen für jede Richtung</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LOCATION -->
+<section class="location" id="location">
+  <div class="container">
+    <div class="location-grid">
+      <div class="location-map reveal">
+        <svg class="map-svg-wrap" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+          <rect width="400" height="400" fill="#1a1917"/>
+          <!-- Simplified abstract valley map -->
+          <path d="M0 280 Q50 260 100 270 Q150 280 180 250 Q200 230 220 240 Q260 260 300 240 Q350 220 400 230 L400 400 L0 400 Z" fill="#222120" opacity="0.8"/>
+          <path d="M0 300 Q80 285 160 295 Q200 300 240 285 Q290 270 340 280 Q370 285 400 275 L400 400 L0 400 Z" fill="#2a2925" opacity="0.6"/>
+          <!-- River Sihl -->
+          <path d="M50 150 Q120 180 180 160 Q220 145 260 170 Q300 190 360 180" stroke="#c9a84c" stroke-width="2.5" fill="none" opacity="0.6" stroke-dasharray="8,4"/>
+          <!-- Mountain peaks -->
+          <polygon points="80,220 110,160 140,220" fill="#2d2c2a" stroke="#333" stroke-width="1"/>
+          <polygon points="140,220 175,150 210,220" fill="#323230" stroke="#333" stroke-width="1"/>
+          <polygon points="240,225 280,155 320,225" fill="#2a2928" stroke="#333" stroke-width="1"/>
+          <!-- Location pins -->
+          <circle cx="180" cy="200" r="8" fill="#c9a84c" opacity="0.9"/>
+          <circle cx="180" cy="200" r="14" fill="#c9a84c" opacity="0.2"/>
+          <circle cx="260" cy="215" r="6" fill="#7ecfb3" opacity="0.7"/>
+          <circle cx="130" cy="230" r="5" fill="#7ecfb3" opacity="0.5"/>
+          <!-- Labels -->
+          <text x="185" y="198" fill="#c9a84c" font-size="10" font-family="sans-serif">Adliswil</text>
+          <text x="155" y="216" fill="rgba(201,168,76,0.6)" font-size="8" font-family="sans-serif">★ Kulturschachtle</text>
+          <text x="230" y="235" fill="rgba(245,242,237,0.3)" font-size="7" font-family="sans-serif">Thalwil</text>
+          <text x="95" y="248" fill="rgba(245,242,237,0.3)" font-size="7" font-family="sans-serif">Langnau a.A.</text>
+          <!-- Grid lines -->
+          <line x1="0" y1="100" x2="400" y2="100" stroke="rgba(255,255,255,0.04)" stroke-width="0.5"/>
+          <line x1="0" y1="200" x2="400" y2="200" stroke="rgba(255,255,255,0.04)" stroke-width="0.5"/>
+          <line x1="0" y1="300" x2="400" y2="300" stroke="rgba(255,255,255,0.04)" stroke-width="0.5"/>
+          <line x1="100" y1="0" x2="100" y2="400" stroke="rgba(255,255,255,0.04)" stroke-width="0.5"/>
+          <line x1="200" y1="0" x2="200" y2="400" stroke="rgba(255,255,255,0.04)" stroke-width="0.5"/>
+          <line x1="300" y1="0" x2="300" y2="400" stroke="rgba(255,255,255,0.04)" stroke-width="0.5"/>
+          <!-- Border -->
+          <rect x="0" y="0" width="400" height="400" fill="none" stroke="rgba(201,168,76,0.15)" stroke-width="1"/>
+          <text x="12" y="22" fill="rgba(201,168,76,0.4)" font-size="9" font-family="sans-serif" letter-spacing="3">ADLISWIL · KANTON ZÜRICH</text>
+        </svg>
+      </div>
+      <div class="location-info reveal reveal-delay-2">
+        <p class="section-label">Unser Heimspielort</p>
+        <h2 class="section-title">Die <em>Kulturschachtle</em></h2>
+        <p>Unser Hauptspielort ist die <strong>Kulturschachtle in Adliswil</strong> — ein charmanter Kulturraum im Herzen des Sihltals, der mit seiner besonderen Atmosphäre jedem Konzert einen eigenen Zauber verleiht.</p>
+        <div class="location-details">
+          <div class="location-detail">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Kulturschachtle, Adliswil, Kanton Zürich
+          </div>
+          <div class="location-detail">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Konzerte das ganze Jahr über
+          </div>
+          <div class="location-detail">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            Intime Konzertatmosphäre, alle Genres willkommen
+          </div>
+          <div class="location-detail">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+            S-Bahn erreichbar — Station Adliswil (S4)
+          </div>
+        </div>
+        <a href="#konzerte" class="btn-primary" style="display:inline-block; margin-top: 2rem;">Konzerte entdecken</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NEWSLETTER -->
+<section class="newsletter" id="newsletter">
+  <div class="container">
+    <p class="section-label">Auf dem Laufenden bleiben</p>
+    <h2 class="section-title">Kein Konzert <em>verpassen</em></h2>
+    <p>Erhalte Infos zu neuen Konzerten, exklusiven Vorverkaufstickets und Vereinsnews direkt in dein Postfach.</p>
+    <form class="newsletter-form" onsubmit="handleNewsletter(event)">
+      <input type="email" placeholder="deine@email.ch" id="emailInput" autocomplete="email">
+      <button type="submit">Anmelden →</button>
+    </form>
+    <p id="newsletter-msg" style="margin-top: 1rem; font-size: 0.85rem; color: var(--accent); opacity: 0; transition: opacity 0.3s;"></p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer id="kontakt">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="#" class="nav-logo">Sihltal <span>Session</span></a>
+        <p>Gemeinnütziger Kulturverein in der Kulturschachtle Adliswil. Livemusik aller Genres — Musik verbindet.</p>
+        <div class="footer-social">
+          <a href="#" class="social-btn" aria-label="Instagram">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>
+          </a>
+          <a href="#" class="social-btn" aria-label="Facebook">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>
+          </a>
+          <a href="#" class="social-btn" aria-label="YouTube">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22.54 6.42a2.78 2.78 0 00-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 001.46 6.42 29 29 0 001 12a29 29 0 00.46 5.58 2.78 2.78 0 001.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 001.95-1.96A29 29 0 0023 12a29 29 0 00-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" fill="currentColor" stroke="none"/></svg>
+          </a>
+          <a href="#" class="social-btn" aria-label="Spotify">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 13.5a7 7 0 0 1 8 0M7 10a9 9 0 0 1 10 0M9 17a5 5 0 0 1 6 0"/></svg>
+          </a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h5>Verein</h5>
+        <ul>
+          <li><a href="#ueber-uns">Über uns</a></li>
+          <li><a href="#">Mitglied werden</a></li>
+          <li><a href="#">Vorstand</a></li>
+          <li><a href="#">Statuten</a></li>
+          <li><a href="#">Jahresbericht</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Kontakt</h5>
+        <ul>
+          <li><a href="mailto:info@sihltalsession.ch">info@sihltalsession.ch</a></li>
+          <li><a href="#">Presse & Medien</a></li>
+          <li><a href="#">Bands bewerben</a></li>
+          <li><a href="#">Sponsoring</a></li>
+          <li><a href="#">Impressum</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span id="footerCopyright" style="cursor:default; user-select:none;">© 2025 Sihltal Session — Kulturschachtle Adliswil</span>
+      <span>Made with ♥ im Sihltal</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ── KONZERT DETAIL MODAL ── -->
+<div id="konzertModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal-backdrop" onclick="closeModal()"></div>
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal()" aria-label="Schliessen">✕</button>
+    <div id="modalImgWrap"></div>
+    <div class="modal-body">
+      <div id="modalFeatured"></div>
+      <div id="modalDate" class="modal-date"></div>
+      <h2 id="modalTitle" class="modal-title"></h2>
+      <div id="modalGenre" class="modal-genre-badge"></div>
+      <div class="modal-meta" id="modalMeta"></div>
+      <div id="modalDesc" class="modal-desc"></div>
+      <div id="modalTicket"></div>
+      <div id="modalShare" class="modal-share-row"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     ADMIN PANEL (versteckter Bereich)
+     Zugang: Klick auf "© 2025" im Footer 5x
+════════════════════════════════════════════════ -->
+<div id="adminOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.97); z-index:9999; overflow-y:auto;">
+
+  <!-- LOGIN -->
+  <div id="adminLogin" style="min-height:100vh; display:flex; align-items:center; justify-content:center; padding:2rem;">
+    <div style="background:#1a1917; border:1px solid rgba(201,168,76,0.3); border-radius:8px; padding:3rem; width:100%; max-width:420px; text-align:center;">
+      <div style="font-size:2.5rem; margin-bottom:1rem;">🎵</div>
+      <h2 style="font-family:'Playfair Display',serif; font-size:1.8rem; color:#c9a84c; margin-bottom:0.5rem;">Admin-Bereich</h2>
+      <p style="color:rgba(245,242,237,0.5); font-size:1rem; margin-bottom:2rem;">Sihltal Session Verwaltung</p>
+      <label style="display:block; text-align:left; font-size:1.1rem; font-weight:500; margin-bottom:0.75rem; color:#f5f2ed;">Passwort:</label>
+      <input type="password" id="adminPwInput"
+        style="width:100%; padding:1rem 1.25rem; font-size:1.2rem; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); border-radius:6px; color:#f5f2ed; outline:none; margin-bottom:1rem;"
+        placeholder="••••••••"
+        onkeydown="if(event.key==='Enter') adminLogin()">
+      <div id="loginError" style="color:#e07070; font-size:1rem; margin-bottom:1rem; display:none;">❌ Falsches Passwort. Bitte nochmal versuchen.</div>
+      <button onclick="adminLogin()"
+        style="width:100%; padding:1rem; background:#c9a84c; color:#0a0a0a; border:none; border-radius:6px; font-size:1.2rem; font-weight:600; cursor:pointer; margin-bottom:1rem;">
+        Einloggen
+      </button>
+      <button onclick="closeAdmin()"
+        style="width:100%; padding:0.75rem; background:transparent; color:rgba(245,242,237,0.4); border:1px solid rgba(255,255,255,0.1); border-radius:6px; font-size:1rem; cursor:pointer;">
+        Abbrechen
+      </button>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="adminDashboard" style="display:none; padding:2rem; max-width:900px; margin:0 auto;">
+
+    <!-- Header -->
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2.5rem; flex-wrap:wrap; gap:1rem;">
+      <div>
+        <h1 style="font-family:'Playfair Display',serif; font-size:2rem; color:#c9a84c;">🎵 Konzert-Verwaltung</h1>
+        <p style="color:rgba(245,242,237,0.5); font-size:1rem; margin-top:0.25rem;">Sihltal Session — Kulturschachtle Adliswil</p>
+      </div>
+      <button onclick="adminLogout()"
+        style="padding:0.75rem 1.5rem; background:transparent; color:rgba(245,242,237,0.6); border:1px solid rgba(255,255,255,0.2); border-radius:6px; font-size:1rem; cursor:pointer;">
+        Ausloggen
+      </button>
+    </div>
+
+    <!-- FORMULAR: Neues Konzert -->
+    <div style="background:#1a1917; border:1px solid rgba(201,168,76,0.25); border-radius:10px; padding:2rem; margin-bottom:2.5rem;">
+      <h2 id="formTitle" style="font-size:1.4rem; font-weight:600; margin-bottom:1.75rem; color:#f5f2ed; display:flex; align-items:center; gap:0.6rem;">
+        ➕ Neues Konzert hinzufügen
+      </h2>
+
+      <!-- Titel -->
+      <label style="display:block; font-size:1.05rem; font-weight:500; margin-bottom:0.5rem; color:#f5f2ed;">🎤 Konzertname *</label>
+      <input type="text" id="f_title" placeholder="z.B. Langnau Jazz Nights"
+        style="width:100%; padding:0.9rem 1rem; font-size:1.1rem; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); border-radius:6px; color:#f5f2ed; outline:none; margin-bottom:1.25rem;">
+
+      <!-- Datum + Genre -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.25rem; margin-bottom:1.25rem;">
+        <div>
+          <label style="display:block; font-size:1.05rem; font-weight:500; margin-bottom:0.5rem; color:#f5f2ed;">📅 Datum *</label>
+          <input type="date" id="f_date"
+            style="width:100%; padding:0.9rem 1rem; font-size:1.1rem; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); border-radius:6px; color:#f5f2ed; outline:none;">
+        </div>
+        <div>
+          <label style="display:block; font-size:1.05rem; font-weight:500; margin-bottom:0.5rem; color:#f5f2ed;">🎸 Musikrichtung *</label>
+          <input type="text" id="f_genre" placeholder="z.B. Jazz · Soul"
+            style="width:100%; padding:0.9rem 1rem; font-size:1.1rem; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); border-radius:6px; color:#f5f2ed; outline:none;">
+        </div>
+      </div>
+
+      <!-- Ort -->
+      <label style="display:block; font-size:1.05rem; font-weight:500; margin-bottom:0.5rem; color:#f5f2ed;">📍 Ort / Veranstaltungsort *</label>
+      <input type="text" id="f_venue" placeholder="z.B. Kulturschachtle, Adliswil"
+        style="width:100%; padding:0.9rem 1rem; font-size:1.1rem; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); border-radius:6px; color:#f5f2ed; outline:none; margin-bottom:1.25rem;">
+
+      <!-- Beschreibung -->
+      <label style="display:block; font-size:1.05rem; font-weight:500; margin-bottom:0.5rem; color:#f5f2ed;">📝 Beschreibung (optional)</label>
+      <textarea id="f_desc" placeholder="z.B. Ein unvergesslicher Abend mit Jazz und Soul am Ufer der Sihl. Einlass ab 19:00 Uhr, Konzertbeginn 20:00 Uhr."
+        rows="3"
+        style="width:100%; padding:0.9rem 1rem; font-size:1.05rem; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); border-radius:6px; color:#f5f2ed; outline:none; margin-bottom:1.25rem; font-family:'DM Sans',sans-serif; resize:vertical; line-height:1.6;"></textarea>
+
+      <!-- Ticket-Link -->
+      <label style="display:block; font-size:1.05rem; font-weight:500; margin-bottom:0.5rem; color:#f5f2ed;">🎟️ Ticket-Link (optional)</label>
+      <input type="url" id="f_ticket" placeholder="https://www.ticketcorner.ch/... oder andere Ticket-Seite"
+        style="width:100%; padding:0.9rem 1rem; font-size:1.1rem; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); border-radius:6px; color:#f5f2ed; outline:none; margin-bottom:0.4rem;">
+      <p style="font-size:0.85rem; color:rgba(245,242,237,0.35); margin-bottom:1.25rem;">Wenn ein Link eingegeben wird, erscheint auf der Konzert-Karte ein «Tickets»-Button.</p>
+
+      <!-- Bild-Upload -->
+      <label style="display:block; font-size:1.05rem; font-weight:500; margin-bottom:0.75rem; color:#f5f2ed;">🖼️ Konzert-Bild hochladen (optional)</label>
+      <div id="imgUploadArea"
+        onclick="document.getElementById('f_imgFile').click()"
+        style="border:2px dashed rgba(201,168,76,0.35); border-radius:8px; padding:2rem; text-align:center; cursor:pointer; transition:border-color 0.2s, background 0.2s; margin-bottom:0.5rem; position:relative;"
+        ondragover="event.preventDefault(); this.style.borderColor='#c9a84c'; this.style.background='rgba(201,168,76,0.07)'"
+        ondragleave="this.style.borderColor='rgba(201,168,76,0.35)'; this.style.background='transparent'"
+        ondrop="handleImgDrop(event)">
+        <div id="imgUploadContent">
+          <div style="font-size:2.5rem; margin-bottom:0.5rem;">📁</div>
+          <div style="font-size:1.1rem; font-weight:500; color:#f5f2ed; margin-bottom:0.3rem;">Bild hier ablegen oder klicken</div>
+          <div style="font-size:0.9rem; color:rgba(245,242,237,0.4);">JPG, PNG, WEBP — max. 5 MB</div>
+        </div>
+        <img id="imgPreview" src="" alt="Vorschau"
+          style="display:none; max-width:100%; max-height:200px; border-radius:6px; object-fit:cover; margin-top:0.5rem;">
+      </div>
+      <input type="file" id="f_imgFile" accept="image/*" style="display:none" onchange="handleImgSelect(this)">
+      <button id="removeImgBtn" onclick="removeImg()" style="display:none; background:transparent; color:rgba(224,112,112,0.8); border:none; font-size:0.9rem; cursor:pointer; margin-bottom:1.25rem; padding:0;">✕ Bild entfernen</button>
+      <div style="margin-bottom:1.25rem;"></div>
+
+      <!-- Featured -->
+      <label style="display:flex; align-items:center; gap:0.75rem; font-size:1.05rem; cursor:pointer; margin-bottom:1.75rem;">
+        <input type="checkbox" id="f_featured" style="width:20px; height:20px; cursor:pointer; accent-color:#c9a84c;">
+        <span style="color:#f5f2ed;">⭐ Als «Featured» markieren (wird speziell hervorgehoben)</span>
+      </label>
+
+      <div id="formError" style="color:#e07070; font-size:1rem; margin-bottom:1rem; display:none; padding:0.75rem; background:rgba(224,112,112,0.1); border-radius:6px;"></div>
+
+      <div style="display:flex; gap:1rem; flex-wrap:wrap;">
+        <button onclick="saveKonzert()"
+          style="flex:1; min-width:180px; padding:1rem 1.5rem; background:#c9a84c; color:#0a0a0a; border:none; border-radius:6px; font-size:1.15rem; font-weight:600; cursor:pointer;">
+          💾 Konzert speichern
+        </button>
+        <button onclick="resetForm()"
+          style="padding:1rem 1.5rem; background:transparent; color:rgba(245,242,237,0.5); border:1px solid rgba(255,255,255,0.15); border-radius:6px; font-size:1rem; cursor:pointer;">
+          Abbrechen
+        </button>
+      </div>
+    </div>
+
+    <!-- LISTE: Bestehende Konzerte -->
+    <div>
+      <h2 style="font-size:1.4rem; font-weight:600; margin-bottom:1.25rem; color:#f5f2ed;">📋 Alle Konzerte</h2>
+      <div id="adminKonzertList"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Admin-Zugang: 5x auf Footer-Copyright klicken -->
+<style>
+  #adminPwInput:focus { border-color: #c9a84c !important; }
+  #f_title:focus, #f_date:focus, #f_genre:focus, #f_venue:focus, #f_img:focus {
+    border-color: rgba(201,168,76,0.6) !important;
+    background: rgba(255,255,255,0.09) !important;
+  }
+  .admin-konzert-row {
+    background: #1a1917;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .admin-konzert-row:hover { border-color: rgba(201,168,76,0.2); }
+  .admin-k-info { flex: 1; min-width: 200px; }
+  .admin-k-title { font-size: 1.1rem; font-weight: 600; color: #f5f2ed; }
+  .admin-k-meta { font-size: 0.9rem; color: rgba(245,242,237,0.5); margin-top: 0.25rem; }
+  .admin-k-actions { display: flex; gap: 0.75rem; flex-shrink: 0; }
+  .btn-edit {
+    padding: 0.6rem 1.1rem; background: rgba(201,168,76,0.15); color: #c9a84c;
+    border: 1px solid rgba(201,168,76,0.3); border-radius: 6px; font-size: 0.95rem;
+    cursor: pointer; font-weight: 500;
+  }
+  .btn-edit:hover { background: rgba(201,168,76,0.25); }
+  .btn-del {
+    padding: 0.6rem 1.1rem; background: rgba(224,112,112,0.1); color: #e07070;
+    border: 1px solid rgba(224,112,112,0.25); border-radius: 6px; font-size: 0.95rem;
+    cursor: pointer; font-weight: 500;
+  }
+  .btn-del:hover { background: rgba(224,112,112,0.2); }
+  .empty-state {
+    text-align: center; padding: 3rem; color: rgba(245,242,237,0.35); font-size: 1.05rem;
+    border: 1px dashed rgba(255,255,255,0.1); border-radius: 8px;
+  }
+  @media(max-width:600px) {
+    #adminDashboard { padding: 1rem; }
+    div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+  }
+</style>
+
+<script>
+  // ── NAVBAR ──
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    navbar.classList.toggle('scrolled', window.scrollY > 60);
+  });
+
+  // ── MOBILE MENU ──
+  document.getElementById('hamburger').addEventListener('click', () => {
+    document.getElementById('mobileMenu').classList.add('open');
+  });
+  document.getElementById('menuClose').addEventListener('click', closeMobileMenu);
+  function closeMobileMenu() {
+    document.getElementById('mobileMenu').classList.remove('open');
+  }
+
+  // ── PARALLAX ──
+  function applyParallax() {
+    const scrollY = window.scrollY;
+    const heroBg = document.getElementById('heroBg');
+    if (heroBg) heroBg.style.transform = `translateY(${scrollY * 0.4}px)`;
+    document.querySelectorAll('.parallax-inner').forEach(el => {
+      const rect = el.closest('.parallax-band').getBoundingClientRect();
+      const center = rect.top + rect.height / 2;
+      const offset = (window.innerHeight / 2 - center) * 0.25;
+      el.style.transform = `translateY(${offset}px)`;
+    });
+  }
+  window.addEventListener('scroll', applyParallax, { passive: true });
+  applyParallax();
+
+  // ── SCROLL REVEAL ──
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }
+    });
+  }, { threshold: 0.12 });
+  reveals.forEach(r => observer.observe(r));
+
+  // ── NEWSLETTER ──
+  function handleNewsletter(e) {
+    e.preventDefault();
+    const val = document.getElementById('emailInput').value.trim();
+    const msg = document.getElementById('newsletter-msg');
+    if (!val || !val.includes('@')) {
+      msg.textContent = 'Bitte eine gültige E-Mail-Adresse eingeben.';
+      msg.style.color = '#e07070';
+    } else {
+      msg.textContent = '✓ Danke! Du erhältst bald eine Bestätigung.';
+      msg.style.color = 'var(--accent)';
+      document.getElementById('emailInput').value = '';
+    }
+    msg.style.opacity = '1';
+    setTimeout(() => msg.style.opacity = '0', 4000);
+  }
+
+  // ════════════════════════════════════
+  // KONZERT-DATEN (localStorage)
+  // ════════════════════════════════════
+  const DEFAULT_KONZERTE = [
+    { id: 1, title: 'Langnau Jazz Nights', date: '2025-06-14', genre: 'Jazz · Soul', venue: 'Kulturschachtle, Adliswil', featured: true, desc: 'Ein unvergesslicher Sommerabend mit Jazz und Soul in der Kulturschachtle. Einlass ab 19:00 Uhr, Konzertbeginn 20:00 Uhr. Getränke und Speisen vor Ort.', ticket: 'https://www.ticketcorner.ch', img: 'https://images.pexels.com/photos/1190297/pexels-photo-1190297.jpeg?auto=compress&cs=tinysrgb&w=600' },
+    { id: 2, title: 'Sihltal Rocks', date: '2025-06-28', genre: 'Rock · Indie', venue: 'Kulturschachtle, Adliswil', featured: false, desc: 'Lokale und regionale Rock- und Indie-Bands geben alles auf der Bühne der Kulturschachtle. Freier Eintritt für Kinder unter 12.', ticket: '', img: 'https://images.pexels.com/photos/1763075/pexels-photo-1763075.jpeg?auto=compress&cs=tinysrgb&w=600' },
+    { id: 3, title: 'Acoustic Night', date: '2025-07-12', genre: 'Folk · Acoustic', venue: 'Kulturschachtle, Adliswil', featured: false, desc: 'Intime Acoustic-Musik in der gemütlichen Atmosphäre der Kulturschachtle. Bitte frühzeitig Plätze reservieren — limitierte Kapazität.', ticket: 'https://www.starticket.ch', img: 'https://images.pexels.com/photos/210922/pexels-photo-210922.jpeg?auto=compress&cs=tinysrgb&w=600' },
+    { id: 4, title: 'Nacht & Klang', date: '2025-08-02', genre: 'Electronic · Ambient', venue: 'Kulturschachtle, Adliswil', featured: false, desc: 'Elektronische Klangwelten in der Kulturschachtle. Eine Reise durch Ambient, Electronica und experimentelle Musik — für Ohren und Seele.', ticket: '', img: 'https://images.pexels.com/photos/1540406/pexels-photo-1540406.jpeg?auto=compress&cs=tinysrgb&w=600' },
+    { id: 5, title: 'Herbstklänge', date: '2025-09-07', genre: 'Klassik · Kammermusik', venue: 'Kulturschachtle, Adliswil', featured: false, desc: 'Kammermusik in der Kulturschachtle. Werke von Mozart, Schubert und zeitgenössischen Schweizer Komponistinnen — ein stiller, bewegender Abend.', ticket: 'https://www.ticketcorner.ch', img: 'https://images.pexels.com/photos/164693/pexels-photo-164693.jpeg?auto=compress&cs=tinysrgb&w=600' },
+    { id: 6, title: 'Weltklang', date: '2025-10-03', genre: 'Blues · World Music', venue: 'Kulturschachtle, Adliswil', featured: false, desc: 'Klänge aus aller Welt in der Kulturschachtle. Blues, Afrobeat, Flamenco und mehr — ein Abend voller musikalischer Entdeckungen.', ticket: '', img: 'https://images.pexels.com/photos/1105666/pexels-photo-1105666.jpeg?auto=compress&cs=tinysrgb&w=600' },
+  ];
+
+  const ADMIN_PW = 'session2025';
+  let currentImgBase64 = null;
+
+  function loadKonzerte() {
+    try {
+      const saved = localStorage.getItem('sihltal_konzerte');
+      return saved ? JSON.parse(saved) : DEFAULT_KONZERTE;
+    } catch(e) { return DEFAULT_KONZERTE; }
+  }
+
+  function saveKonzerteToStorage(list) {
+    try { localStorage.setItem('sihltal_konzerte', JSON.stringify(list)); } catch(e) {
+      alert('⚠️ Der Speicher ist voll (zu viele/grosse Bilder). Bitte ein älteres Konzert löschen.');
+    }
+  }
+
+  function formatDateDE(dateStr) {
+    if (!dateStr) return '';
+    const [y, m, d] = dateStr.split('-');
+    const months = ['Jan.','Feb.','März','Apr.','Mai','Juni','Juli','Aug.','Sep.','Okt.','Nov.','Dez.'];
+    const weekdays = ['So.','Mo.','Di.','Mi.','Do.','Fr.','Sa.'];
+    const date = new Date(+y, +m-1, +d);
+    return `${weekdays[date.getDay()]} ${+d}. ${months[+m-1]} ${y}`;
+  }
+
+  // ── RENDER KONZERTE auf der Website ──
+  function renderConcerts() {
+    const list = loadKonzerte();
+    list.sort((a,b) => a.date.localeCompare(b.date));
+    const grid = document.getElementById('concertGrid');
+    if (!grid) return;
+    const pinSVG = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>`;
+    const defaultImgs = [
+      'https://images.pexels.com/photos/1190297/pexels-photo-1190297.jpeg?auto=compress&cs=tinysrgb&w=600',
+      'https://images.pexels.com/photos/1763075/pexels-photo-1763075.jpeg?auto=compress&cs=tinysrgb&w=600',
+      'https://images.pexels.com/photos/1105666/pexels-photo-1105666.jpeg?auto=compress&cs=tinysrgb&w=600',
+    ];
+    grid.innerHTML = list.map((k, i) => {
+      const ticketIndicator = k.ticket
+        ? `<span class="ticket-btn" style="pointer-events:none;">🎟️ Tickets</span>` : '';
+      const desc = k.desc ? `<div class="concert-desc">${k.desc}</div>` : '';
+      return `
+        <div class="concert-card" onclick="navigateTo(${k.id})" role="button" tabindex="0"
+          onkeydown="if(event.key==='Enter'||event.key===' ')navigateTo(${k.id})">
+          ${k.featured ? '<div class="featured-badge">Featured</div>' : ''}
+          <img class="concert-thumb" src="${k.img || defaultImgs[i % 3]}" alt="${k.title}" loading="lazy">
+          <div class="concert-date">${formatDateDE(k.date)}</div>
+          <div class="concert-genre">${k.genre}</div>
+          <h3>${k.title}</h3>
+          ${desc}
+          <div class="concert-footer">
+            <div class="concert-venue">${pinSVG} ${k.venue}</div>
+            ${ticketIndicator}
+          </div>
+          <div class="card-tap-hint">Antippen für Details →</div>
+        </div>`;
+    }).join('');
+  }
+
+  // ════════════════════════════════════
+  // HASH-ROUTING — jedes Konzert hat eine eigene URL
+  // z.B. index.html#/konzert/3
+  // ════════════════════════════════════
+
+  function navigateTo(id) {
+    window.location.hash = `/konzert/${id}`;
+  }
+
+  function getHashId() {
+    const m = window.location.hash.match(/^#\/konzert\/(\d+)$/);
+    return m ? parseInt(m[1]) : null;
+  }
+
+  function handleHash() {
+    const id = getHashId();
+    if (id !== null) {
+      openModal(id);
+    } else {
+      closeModal(false); // false = don't push hash again
+    }
+  }
+
+  window.addEventListener('hashchange', handleHash);
+  window.addEventListener('load', handleHash);
+
+  // ── MODAL öffnen ──
+  function openModal(id) {
+    const list = loadKonzerte();
+    const k = list.find(x => x.id === id);
+    if (!k) { window.location.hash = ''; return; }
+
+    const defaultImgs = [
+      'https://images.pexels.com/photos/1190297/pexels-photo-1190297.jpeg?auto=compress&cs=tinysrgb&w=600',
+      'https://images.pexels.com/photos/1763075/pexels-photo-1763075.jpeg?auto=compress&cs=tinysrgb&w=600',
+      'https://images.pexels.com/photos/1105666/pexels-photo-1105666.jpeg?auto=compress&cs=tinysrgb&w=600',
+    ];
+    const imgSrc = k.img || defaultImgs[id % 3];
+
+    // Meta-Tags für Social-Sharing aktualisieren
+    document.title = `${k.title} — Sihltal Session`;
+    setMeta('og:title', k.title);
+    setMeta('og:description', k.desc || `${k.genre} · ${formatDateDE(k.date)} · ${k.venue}`);
+    if (imgSrc) setMeta('og:image', imgSrc);
+
+    // Bild
+    document.getElementById('modalImgWrap').innerHTML = imgSrc
+      ? `<img class="modal-img" src="${imgSrc}" alt="${k.title}">`
+      : `<div class="modal-img-placeholder">🎵</div>`;
+
+    document.getElementById('modalFeatured').innerHTML = k.featured
+      ? `<span class="modal-featured">⭐ Featured</span>` : '';
+    document.getElementById('modalDate').textContent = formatDateDE(k.date);
+    document.getElementById('modalTitle').textContent = k.title;
+    document.getElementById('modalGenre').textContent = k.genre;
+
+    document.getElementById('modalMeta').innerHTML = `
+      <div class="modal-meta-row">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        ${k.venue}
+      </div>
+      <div class="modal-meta-row">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        ${formatDateDE(k.date)}
+      </div>`;
+
+    document.getElementById('modalDesc').innerHTML = k.desc
+      ? k.desc
+      : '<em style="opacity:0.4">Keine Beschreibung vorhanden.</em>';
+
+    document.getElementById('modalTicket').innerHTML = k.ticket
+      ? `<a class="modal-ticket-btn" href="${k.ticket}" target="_blank" rel="noopener">🎟️ Jetzt Tickets kaufen</a>`
+      : `<div class="modal-no-ticket">Keine Online-Tickets — Eintritt an der Abendkasse</div>`;
+
+    // Share-Bereich
+    const shareUrl = window.location.origin + window.location.pathname + `#/konzert/${k.id}`;
+    const shareText = `${k.title} — ${formatDateDE(k.date)}, ${k.venue}`;
+    let shareHtml = `<button class="modal-share-btn" id="copyLinkBtn" onclick="copyLink('${shareUrl}')">🔗 Link kopieren</button>`;
+    if (navigator.share) {
+      shareHtml += `<button class="modal-share-btn" onclick="nativeShare('${shareUrl}','${shareText.replace(/'/g,"\\'")}')">📤 Teilen</button>`;
+    }
+    document.getElementById('modalShare').innerHTML = shareHtml;
+
+    const modal = document.getElementById('konzertModal');
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    modal.querySelector('.modal-box').scrollTop = 0;
+  }
+
+  function setMeta(property, content) {
+    let el = document.querySelector(`meta[property="${property}"]`);
+    if (!el) { el = document.createElement('meta'); el.setAttribute('property', property); document.head.appendChild(el); }
+    el.setAttribute('content', content);
+  }
+
+  // ── MODAL schliessen ──
+  function closeModal(updateHash = true) {
+    const modal = document.getElementById('konzertModal');
+    if (!modal.classList.contains('open')) return;
+    modal.classList.remove('open');
+    document.body.style.overflow = '';
+    document.title = 'Sihltal Session — Musik im Tal';
+    if (updateHash) {
+      history.pushState('', document.title, window.location.pathname + window.location.search);
+    }
+  }
+
+  // ── Link kopieren ──
+  function copyLink(url) {
+    navigator.clipboard.writeText(url).then(() => {
+      const btn = document.getElementById('copyLinkBtn');
+      if (btn) { btn.textContent = '✅ Kopiert!'; btn.classList.add('copied'); setTimeout(() => { btn.textContent = '🔗 Link kopieren'; btn.classList.remove('copied'); }, 2500); }
+    });
+  }
+
+  // ── Native Share (iOS/Android) ──
+  function nativeShare(url, text) {
+    navigator.share({ title: document.getElementById('modalTitle').textContent, text, url }).catch(() => {});
+  }
+
+  // ESC zum Schliessen
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeModal();
+  });
+
+  renderConcerts();
+
+  // ════════════════════════════════════
+  // ARCHIV — Vergangene Konzerte
+  // ════════════════════════════════════
+  let archivGenre = 'alle';
+  let archivSort = 'datum-neu';
+
+  function isPast(dateStr) {
+    if (!dateStr) return false;
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    const d = new Date(dateStr);
+    return d < today;
+  }
+
+  function getPastKonzerte() {
+    return loadKonzerte().filter(k => isPast(k.date));
+  }
+
+  function getGenres() {
+    const genres = new Set();
+    getPastKonzerte().forEach(k => {
+      k.genre.split(/[·,\/]/).forEach(g => {
+        const t = g.trim();
+        if (t) genres.add(t);
+      });
+    });
+    return [...genres].sort();
+  }
+
+  function renderArchivFilters() {
+    const genres = getGenres();
+    const container = document.getElementById('archivGenreFilters');
+    if (!container) return;
+    const allActive = archivGenre === 'alle' ? ' active' : '';
+    container.innerHTML = `<button class="filter-btn${allActive}" data-genre="alle" onclick="setGenreFilter('alle')">Alle</button>`
+      + genres.map(g => {
+          const active = archivGenre === g ? ' active' : '';
+          return `<button class="filter-btn${active}" data-genre="${g}" onclick="setGenreFilter('${g.replace(/'/g,"\\'")}')">${g}</button>`;
+        }).join('');
+  }
+
+  function setGenreFilter(genre) {
+    archivGenre = genre;
+    renderArchivFilters();
+    renderArchiv();
+  }
+
+  function setSort(sort) {
+    archivSort = sort;
+    document.querySelectorAll('.sort-btn').forEach(b => b.classList.toggle('active', b.dataset.sort === sort));
+    renderArchiv();
+  }
+
+  function renderArchiv() {
+    let list = getPastKonzerte();
+    if (archivGenre !== 'alle') {
+      list = list.filter(k => k.genre.toLowerCase().includes(archivGenre.toLowerCase()));
+    }
+    if (archivSort === 'datum-neu') list.sort((a,b) => b.date.localeCompare(a.date));
+    else if (archivSort === 'datum-alt') list.sort((a,b) => a.date.localeCompare(b.date));
+    else if (archivSort === 'name') list.sort((a,b) => a.title.localeCompare(b.title, 'de'));
+
+    const grid = document.getElementById('archivGrid');
+    const empty = document.getElementById('archivEmpty');
+    if (!grid) return;
+
+    if (list.length === 0) {
+      grid.innerHTML = '';
+      grid.style.display = 'none';
+      empty.style.display = 'block';
+      return;
+    }
+    grid.style.display = 'grid';
+    empty.style.display = 'none';
+
+    const pinSVG = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>`;
+    const defaultImgs = [
+      'https://images.pexels.com/photos/1190297/pexels-photo-1190297.jpeg?auto=compress&cs=tinysrgb&w=600',
+      'https://images.pexels.com/photos/1763075/pexels-photo-1763075.jpeg?auto=compress&cs=tinysrgb&w=600',
+      'https://images.pexels.com/photos/1105666/pexels-photo-1105666.jpeg?auto=compress&cs=tinysrgb&w=600',
+    ];
+
+    grid.innerHTML = list.map((k, i) => {
+      const img = k.img || defaultImgs[i % 3];
+      return `
+        <div class="archiv-card" onclick="navigateTo(${k.id})" role="button" tabindex="0"
+          onkeydown="if(event.key==='Enter'||event.key===' ')navigateTo(${k.id})">
+          <span class="archiv-past-label">Vergangen</span>
+          <img class="archiv-card-img" src="${img}" alt="${k.title}" loading="lazy">
+          <div class="archiv-card-body">
+            <div class="archiv-card-date">${formatDateDE(k.date)}</div>
+            <div class="archiv-card-title">${k.title}</div>
+            <div class="archiv-card-genre">${k.genre}</div>
+            <div class="archiv-card-venue">${pinSVG} ${k.venue}</div>
+          </div>
+        </div>`;
+    }).join('');
+
+    grid.querySelectorAll('.archiv-card').forEach((el, i) => {
+      el.style.transitionDelay = `${i * 40}ms`;
+      requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('visible')));
+    });
+  }
+
+  renderArchivFilters();
+  renderArchiv();
+
+  // ════════════════════════════════════
+  // ADMIN LOGIK
+  // ════════════════════════════════════
+  let adminLoggedIn = false;
+  let editingId = null;
+  let footerClickCount = 0;
+  let footerClickTimer = null;
+
+  document.getElementById('footerCopyright').addEventListener('click', () => {
+    footerClickCount++;
+    clearTimeout(footerClickTimer);
+    footerClickTimer = setTimeout(() => { footerClickCount = 0; }, 2500);
+    if (footerClickCount >= 5) { footerClickCount = 0; openAdmin(); }
+  });
+
+  function openAdmin() {
+    document.getElementById('adminOverlay').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+    if (adminLoggedIn) showDashboard();
+    else { document.getElementById('adminLogin').style.display = 'flex'; document.getElementById('adminDashboard').style.display = 'none'; }
+    setTimeout(() => document.getElementById('adminPwInput') && document.getElementById('adminPwInput').focus(), 100);
+  }
+
+  function closeAdmin() {
+    document.getElementById('adminOverlay').style.display = 'none';
+    document.body.style.overflow = '';
+  }
+
+  function adminLogin() {
+    const pw = document.getElementById('adminPwInput').value;
+    if (pw === ADMIN_PW) {
+      adminLoggedIn = true;
+      document.getElementById('loginError').style.display = 'none';
+      document.getElementById('adminPwInput').value = '';
+      showDashboard();
+    } else {
+      document.getElementById('loginError').style.display = 'block';
+      document.getElementById('adminPwInput').value = '';
+      document.getElementById('adminPwInput').focus();
+    }
+  }
+
+  function adminLogout() { adminLoggedIn = false; closeAdmin(); }
+
+  function showDashboard() {
+    document.getElementById('adminLogin').style.display = 'none';
+    document.getElementById('adminDashboard').style.display = 'block';
+    renderAdminList();
+  }
+
+  // ── Bild-Upload Handling ──
+  function handleImgSelect(input) {
+    const file = input.files[0];
+    if (!file) return;
+    processImgFile(file);
+  }
+
+  function handleImgDrop(event) {
+    event.preventDefault();
+    document.getElementById('imgUploadArea').style.borderColor = 'rgba(201,168,76,0.35)';
+    document.getElementById('imgUploadArea').style.background = 'transparent';
+    const file = event.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) processImgFile(file);
+  }
+
+  function processImgFile(file) {
+    if (file.size > 5 * 1024 * 1024) {
+      alert('⚠️ Das Bild ist zu gross (max. 5 MB). Bitte ein kleineres Bild wählen.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      currentImgBase64 = e.target.result;
+      document.getElementById('imgPreview').src = currentImgBase64;
+      document.getElementById('imgPreview').style.display = 'block';
+      document.getElementById('imgUploadContent').style.display = 'none';
+      document.getElementById('removeImgBtn').style.display = 'inline-block';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function removeImg() {
+    currentImgBase64 = null;
+    document.getElementById('imgPreview').src = '';
+    document.getElementById('imgPreview').style.display = 'none';
+    document.getElementById('imgUploadContent').style.display = 'block';
+    document.getElementById('removeImgBtn').style.display = 'none';
+    document.getElementById('f_imgFile').value = '';
+  }
+
+  // ── Admin-Liste rendern ──
+  function renderAdminList() {
+    const list = loadKonzerte();
+    list.sort((a,b) => a.date.localeCompare(b.date));
+    const el = document.getElementById('adminKonzertList');
+    if (list.length === 0) {
+      el.innerHTML = '<div class="empty-state">📭 Noch keine Konzerte vorhanden. Füge dein erstes Konzert hinzu!</div>';
+      return;
+    }
+    el.innerHTML = list.map(k => `
+      <div class="admin-konzert-row">
+        <div style="width:64px; height:54px; border-radius:4px; overflow:hidden; flex-shrink:0; background:#222; display:flex; align-items:center; justify-content:center;">
+          ${k.img ? `<img src="${k.img}" style="width:100%; height:100%; object-fit:cover;" onerror="this.style.display='none'">` : '<span style="font-size:1.5rem;">🎵</span>'}
+        </div>
+        <div class="admin-k-info">
+          <div class="admin-k-title">${k.featured ? '⭐ ' : ''}${k.title}</div>
+          <div class="admin-k-meta">📅 ${formatDateDE(k.date)} &nbsp;·&nbsp; 🎸 ${k.genre} &nbsp;·&nbsp; 📍 ${k.venue}</div>
+          ${k.ticket ? `<div style="font-size:0.8rem; color:rgba(201,168,76,0.7); margin-top:0.2rem;">🎟️ Ticket-Link vorhanden</div>` : ''}
+        </div>
+        <div class="admin-k-actions">
+          <button class="btn-edit" onclick="editKonzert(${k.id})">✏️ Bearbeiten</button>
+          <button class="btn-del" onclick="deleteKonzert(${k.id})">🗑️ Löschen</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // ── Formular zurücksetzen ──
+  function resetForm() {
+    editingId = null;
+    currentImgBase64 = null;
+    document.getElementById('formTitle').innerHTML = '➕ Neues Konzert hinzufügen';
+    document.getElementById('f_title').value = '';
+    document.getElementById('f_date').value = '';
+    document.getElementById('f_genre').value = '';
+    document.getElementById('f_venue').value = '';
+    document.getElementById('f_desc').value = '';
+    document.getElementById('f_ticket').value = '';
+    document.getElementById('f_imgFile').value = '';
+    document.getElementById('f_featured').checked = false;
+    document.getElementById('formError').style.display = 'none';
+    document.getElementById('imgPreview').style.display = 'none';
+    document.getElementById('imgPreview').src = '';
+    document.getElementById('imgUploadContent').style.display = 'block';
+    document.getElementById('removeImgBtn').style.display = 'none';
+    document.getElementById('adminOverlay').scrollTo({ top: 0, behavior: 'smooth' });
+    setTimeout(() => document.getElementById('f_title').focus(), 300);
+  }
+
+  // ── Konzert bearbeiten ──
+  function editKonzert(id) {
+    const list = loadKonzerte();
+    const k = list.find(x => x.id === id);
+    if (!k) return;
+    editingId = id;
+    document.getElementById('formTitle').innerHTML = '✏️ Konzert bearbeiten';
+    document.getElementById('f_title').value = k.title;
+    document.getElementById('f_date').value = k.date;
+    document.getElementById('f_genre').value = k.genre;
+    document.getElementById('f_venue').value = k.venue;
+    document.getElementById('f_desc').value = k.desc || '';
+    document.getElementById('f_ticket').value = k.ticket || '';
+    document.getElementById('f_featured').checked = k.featured || false;
+    // Bild-Vorschau
+    if (k.img) {
+      currentImgBase64 = k.img;
+      document.getElementById('imgPreview').src = k.img;
+      document.getElementById('imgPreview').style.display = 'block';
+      document.getElementById('imgUploadContent').style.display = 'none';
+      document.getElementById('removeImgBtn').style.display = 'inline-block';
+    } else {
+      removeImg();
+    }
+    document.getElementById('adminOverlay').scrollTo({ top: 0, behavior: 'smooth' });
+    setTimeout(() => document.getElementById('f_title').focus(), 300);
+  }
+
+  // ── Konzert löschen ──
+  function deleteKonzert(id) {
+    const list = loadKonzerte();
+    const k = list.find(x => x.id === id);
+    if (!k) return;
+    if (!confirm(`Konzert wirklich löschen?\n\n"${k.title}"\n\nDies kann nicht rückgängig gemacht werden.`)) return;
+    saveKonzerteToStorage(list.filter(x => x.id !== id));
+    renderAdminList();
+    renderConcerts();
+    renderArchivFilters();
+    renderArchiv();
+  }
+
+  // ── Konzert speichern ──
+  function saveKonzert() {
+    const title  = document.getElementById('f_title').value.trim();
+    const date   = document.getElementById('f_date').value.trim();
+    const genre  = document.getElementById('f_genre').value.trim();
+    const venue  = document.getElementById('f_venue').value.trim();
+    const desc   = document.getElementById('f_desc').value.trim();
+    const ticket = document.getElementById('f_ticket').value.trim();
+    const featured = document.getElementById('f_featured').checked;
+    const errEl  = document.getElementById('formError');
+
+    if (!title || !date || !genre || !venue) {
+      errEl.textContent = '⚠️ Bitte alle Pflichtfelder ausfüllen (Name, Datum, Musikrichtung, Ort).';
+      errEl.style.display = 'block';
+      errEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+    errEl.style.display = 'none';
+
+    const imgData = currentImgBase64 || '';
+    let list = loadKonzerte();
+    if (editingId !== null) {
+      list = list.map(k => k.id === editingId ? { ...k, title, date, genre, venue, desc, ticket, featured, img: imgData } : k);
+    } else {
+      const newId = list.length > 0 ? Math.max(...list.map(k => k.id)) + 1 : 1;
+      list.push({ id: newId, title, date, genre, venue, desc, ticket, featured, img: imgData });
+    }
+    saveKonzerteToStorage(list);
+    renderAdminList();
+    renderConcerts();
+    renderArchivFilters();
+    renderArchiv();
+    resetForm();
+    const btn = document.querySelector('button[onclick="saveKonzert()"]');
+    const orig = btn.textContent;
+    btn.textContent = '✅ Gespeichert!';
+    btn.style.background = '#4caf7d';
+    setTimeout(() => { btn.textContent = orig; btn.style.background = '#c9a84c'; }, 2500);
+  }
+</script>
+</body>
+</html>
