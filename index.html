@@ -1375,6 +1375,11 @@
       <div style="font-size:2.5rem; margin-bottom:1rem;">🎵</div>
       <h2 style="font-family:'Playfair Display',serif; font-size:1.8rem; color:#c9a84c; margin-bottom:0.5rem;">Admin-Bereich</h2>
       <p style="color:rgba(245,242,237,0.5); font-size:1rem; margin-bottom:2rem;">Sihltal Session Verwaltung</p>
+      <label style="display:block; text-align:left; font-size:1.1rem; font-weight:500; margin-bottom:0.75rem; color:#f5f2ed;">E-Mail:</label>
+      <input type="email" id="adminEmailInput"
+        style="width:100%; padding:1rem 1.25rem; font-size:1.2rem; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); border-radius:6px; color:#f5f2ed; outline:none; margin-bottom:1rem;"
+        placeholder="admin@beispiel.ch"
+        onkeydown="if(event.key==='Enter') document.getElementById('adminPwInput').focus()">
       <label style="display:block; text-align:left; font-size:1.1rem; font-weight:500; margin-bottom:0.75rem; color:#f5f2ed;">Passwort:</label>
       <input type="password" id="adminPwInput"
         style="width:100%; padding:1rem 1.25rem; font-size:1.2rem; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); border-radius:6px; color:#f5f2ed; outline:none; margin-bottom:1rem;"
@@ -1543,21 +1548,25 @@
   }
 </style>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+  // ════════════════════════════════════
+  // SUPABASE — Konfiguration
+  // Der anon-key ist öffentlich (read-only für Besucher).
+  // Schreiben ist nur mit echtem Supabase-Login möglich (Row Level Security).
+  // ════════════════════════════════════
+  const SUPABASE_URL  = 'https://mbsthaauklgsuveucrrk.supabase.co';
+  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ic3RoYXV1a2xnc3V2ZXVjcnJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4ODQ4ODMsImV4cCI6MjA5NTQ2MDg4M30.Kmyq95lr8ka4WT36h4zUDB08ai9KjQ2jCmSDia2sjHo';
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
   // ── NAVBAR ──
   const navbar = document.getElementById('navbar');
-  window.addEventListener('scroll', () => {
-    navbar.classList.toggle('scrolled', window.scrollY > 60);
-  });
+  window.addEventListener('scroll', () => navbar.classList.toggle('scrolled', window.scrollY > 60));
 
   // ── MOBILE MENU ──
-  document.getElementById('hamburger').addEventListener('click', () => {
-    document.getElementById('mobileMenu').classList.add('open');
-  });
+  document.getElementById('hamburger').addEventListener('click', () => document.getElementById('mobileMenu').classList.add('open'));
   document.getElementById('menuClose').addEventListener('click', closeMobileMenu);
-  function closeMobileMenu() {
-    document.getElementById('mobileMenu').classList.remove('open');
-  }
+  function closeMobileMenu() { document.getElementById('mobileMenu').classList.remove('open'); }
 
   // ── PARALLAX ──
   function applyParallax() {
@@ -1566,8 +1575,7 @@
     if (heroBg) heroBg.style.transform = `translateY(${scrollY * 0.4}px)`;
     document.querySelectorAll('.parallax-inner').forEach(el => {
       const rect = el.closest('.parallax-band').getBoundingClientRect();
-      const center = rect.top + rect.height / 2;
-      const offset = (window.innerHeight / 2 - center) * 0.25;
+      const offset = (window.innerHeight / 2 - (rect.top + rect.height / 2)) * 0.25;
       el.style.transform = `translateY(${offset}px)`;
     });
   }
@@ -1575,58 +1583,51 @@
   applyParallax();
 
   // ── SCROLL REVEAL ──
-  const reveals = document.querySelectorAll('.reveal');
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(e => {
-      if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }
-    });
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
   }, { threshold: 0.12 });
-  reveals.forEach(r => observer.observe(r));
+  document.querySelectorAll('.reveal').forEach(r => observer.observe(r));
 
   // ── NEWSLETTER ──
   function handleNewsletter(e) {
     e.preventDefault();
     const val = document.getElementById('emailInput').value.trim();
     const msg = document.getElementById('newsletter-msg');
-    if (!val || !val.includes('@')) {
-      msg.textContent = 'Bitte eine gültige E-Mail-Adresse eingeben.';
-      msg.style.color = '#e07070';
-    } else {
-      msg.textContent = '✓ Danke! Du erhältst bald eine Bestätigung.';
-      msg.style.color = 'var(--accent)';
-      document.getElementById('emailInput').value = '';
-    }
+    if (!val || !val.includes('@')) { msg.textContent = 'Bitte eine gültige E-Mail-Adresse eingeben.'; msg.style.color = '#e07070'; }
+    else { msg.textContent = '✓ Danke! Du erhältst bald eine Bestätigung.'; msg.style.color = 'var(--accent)'; document.getElementById('emailInput').value = ''; }
     msg.style.opacity = '1';
     setTimeout(() => msg.style.opacity = '0', 4000);
   }
 
   // ════════════════════════════════════
-  // KONZERT-DATEN (localStorage)
+  // SECURITY HELPERS
   // ════════════════════════════════════
-  const DEFAULT_KONZERTE = [
-    { id: 1, title: 'Langnau Jazz Nights', date: '2025-06-14', genre: 'Jazz · Soul', venue: 'Kulturschachtle, Adliswil', featured: true, desc: 'Ein unvergesslicher Sommerabend mit Jazz und Soul in der Kulturschachtle. Einlass ab 19:00 Uhr, Konzertbeginn 20:00 Uhr. Getränke und Speisen vor Ort.', ticket: 'https://www.ticketcorner.ch', img: 'https://images.pexels.com/photos/1190297/pexels-photo-1190297.jpeg?auto=compress&cs=tinysrgb&w=600' },
-    { id: 2, title: 'Sihltal Rocks', date: '2025-06-28', genre: 'Rock · Indie', venue: 'Kulturschachtle, Adliswil', featured: false, desc: 'Lokale und regionale Rock- und Indie-Bands geben alles auf der Bühne der Kulturschachtle. Freier Eintritt für Kinder unter 12.', ticket: '', img: 'https://images.pexels.com/photos/1763075/pexels-photo-1763075.jpeg?auto=compress&cs=tinysrgb&w=600' },
-    { id: 3, title: 'Acoustic Night', date: '2025-07-12', genre: 'Folk · Acoustic', venue: 'Kulturschachtle, Adliswil', featured: false, desc: 'Intime Acoustic-Musik in der gemütlichen Atmosphäre der Kulturschachtle. Bitte frühzeitig Plätze reservieren — limitierte Kapazität.', ticket: 'https://www.starticket.ch', img: 'https://images.pexels.com/photos/210922/pexels-photo-210922.jpeg?auto=compress&cs=tinysrgb&w=600' },
-    { id: 4, title: 'Nacht & Klang', date: '2025-08-02', genre: 'Electronic · Ambient', venue: 'Kulturschachtle, Adliswil', featured: false, desc: 'Elektronische Klangwelten in der Kulturschachtle. Eine Reise durch Ambient, Electronica und experimentelle Musik — für Ohren und Seele.', ticket: '', img: 'https://images.pexels.com/photos/1540406/pexels-photo-1540406.jpeg?auto=compress&cs=tinysrgb&w=600' },
-    { id: 5, title: 'Herbstklänge', date: '2025-09-07', genre: 'Klassik · Kammermusik', venue: 'Kulturschachtle, Adliswil', featured: false, desc: 'Kammermusik in der Kulturschachtle. Werke von Mozart, Schubert und zeitgenössischen Schweizer Komponistinnen — ein stiller, bewegender Abend.', ticket: 'https://www.ticketcorner.ch', img: 'https://images.pexels.com/photos/164693/pexels-photo-164693.jpeg?auto=compress&cs=tinysrgb&w=600' },
-    { id: 6, title: 'Weltklang', date: '2025-10-03', genre: 'Blues · World Music', venue: 'Kulturschachtle, Adliswil', featured: false, desc: 'Klänge aus aller Welt in der Kulturschachtle. Blues, Afrobeat, Flamenco und mehr — ein Abend voller musikalischer Entdeckungen.', ticket: '', img: 'https://images.pexels.com/photos/1105666/pexels-photo-1105666.jpeg?auto=compress&cs=tinysrgb&w=600' },
-  ];
-
-  const ADMIN_PW = 'session2025';
-  let currentImgBase64 = null;
-
-  function loadKonzerte() {
-    try {
-      const saved = localStorage.getItem('sihltal_konzerte');
-      return saved ? JSON.parse(saved) : DEFAULT_KONZERTE;
-    } catch(e) { return DEFAULT_KONZERTE; }
+  function esc(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+  }
+  function safeUrl(url) {
+    try { const u = new URL(url); return u.protocol === 'https:' ? url : ''; } catch { return ''; }
   }
 
-  function saveKonzerteToStorage(list) {
-    try { localStorage.setItem('sihltal_konzerte', JSON.stringify(list)); } catch(e) {
-      alert('⚠️ Der Speicher ist voll (zu viele/grosse Bilder). Bitte ein älteres Konzert löschen.');
-    }
+  // ════════════════════════════════════
+  // DATEN LADEN von Supabase
+  // ════════════════════════════════════
+  let _konzertCache = null;
+
+  async function loadKonzerte() {
+    if (_konzertCache) return _konzertCache;
+    const { data, error } = await sb.from('konzerte').select('*').order('date', { ascending: true });
+    if (error) { console.error('Supabase load error:', error); return []; }
+    _konzertCache = (data || []).map(k => ({
+      id: k.id, title: k.title, date: k.date, genre: k.genre,
+      venue: k.venue, desc: k.description, ticket: k.ticket_url,
+      img: k.img, featured: k.featured
+    }));
+    return _konzertCache;
   }
+
+  function invalidateCache() { _konzertCache = null; }
 
   function formatDateDE(dateStr) {
     if (!dateStr) return '';
@@ -1637,282 +1638,158 @@
     return `${weekdays[date.getDay()]} ${+d}. ${months[+m-1]} ${y}`;
   }
 
-  // ── RENDER KONZERTE auf der Website ──
-  function renderConcerts() {
-    const list = loadKonzerte();
-    list.sort((a,b) => a.date.localeCompare(b.date));
+  // ── RENDER KONZERTE ──
+  async function renderConcerts() {
     const grid = document.getElementById('concertGrid');
     if (!grid) return;
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:2rem;color:rgba(245,242,237,0.3);">Konzerte werden geladen…</div>`;
+    const list = await loadKonzerte();
+    const today = new Date(); today.setHours(0,0,0,0);
+    const upcoming = list.filter(k => new Date(k.date) >= today);
     const pinSVG = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>`;
-    const defaultImgs = [
-      'https://images.pexels.com/photos/1190297/pexels-photo-1190297.jpeg?auto=compress&cs=tinysrgb&w=600',
-      'https://images.pexels.com/photos/1763075/pexels-photo-1763075.jpeg?auto=compress&cs=tinysrgb&w=600',
-      'https://images.pexels.com/photos/1105666/pexels-photo-1105666.jpeg?auto=compress&cs=tinysrgb&w=600',
-    ];
-    grid.innerHTML = list.map((k, i) => {
-      const ticketIndicator = k.ticket
-        ? `<span class="ticket-btn" style="pointer-events:none;">🎟️ Tickets</span>` : '';
-      const desc = k.desc ? `<div class="concert-desc">${k.desc}</div>` : '';
-      return `
-        <div class="concert-card" onclick="navigateTo(${k.id})" role="button" tabindex="0"
-          onkeydown="if(event.key==='Enter'||event.key===' ')navigateTo(${k.id})">
-          ${k.featured ? '<div class="featured-badge">Featured</div>' : ''}
-          <img class="concert-thumb" src="${k.img || defaultImgs[i % 3]}" alt="${k.title}" loading="lazy">
-          <div class="concert-date">${formatDateDE(k.date)}</div>
-          <div class="concert-genre">${k.genre}</div>
-          <h3>${k.title}</h3>
-          ${desc}
-          <div class="concert-footer">
-            <div class="concert-venue">${pinSVG} ${k.venue}</div>
-            ${ticketIndicator}
-          </div>
-          <div class="card-tap-hint">Antippen für Details →</div>
-        </div>`;
-    }).join('');
-  }
-
-  // ════════════════════════════════════
-  // HASH-ROUTING — jedes Konzert hat eine eigene URL
-  // z.B. index.html#/konzert/3
-  // ════════════════════════════════════
-
-  function navigateTo(id) {
-    window.location.hash = `/konzert/${id}`;
-  }
-
-  function getHashId() {
-    const m = window.location.hash.match(/^#\/konzert\/(\d+)$/);
-    return m ? parseInt(m[1]) : null;
-  }
-
-  function handleHash() {
-    const id = getHashId();
-    if (id !== null) {
-      openModal(id);
-    } else {
-      closeModal(false); // false = don't push hash again
+    const fallback = ['https://images.pexels.com/photos/1190297/pexels-photo-1190297.jpeg?auto=compress&cs=tinysrgb&w=600','https://images.pexels.com/photos/1763075/pexels-photo-1763075.jpeg?auto=compress&cs=tinysrgb&w=600','https://images.pexels.com/photos/1105666/pexels-photo-1105666.jpeg?auto=compress&cs=tinysrgb&w=600'];
+    if (upcoming.length === 0) {
+      grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:3rem;color:rgba(245,242,237,0.35);">Momentan keine bevorstehenden Konzerte.<br>Schau bald wieder vorbei!</div>`;
+      return;
     }
+    grid.innerHTML = upcoming.map((k,i) => `
+      <div class="concert-card" onclick="navigateTo(${+k.id})" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')navigateTo(${+k.id})">
+        ${k.featured ? '<div class="featured-badge">Featured</div>' : ''}
+        <img class="concert-thumb" src="${esc(k.img||fallback[i%3])}" alt="${esc(k.title)}" loading="lazy">
+        <div class="concert-date">${formatDateDE(k.date)}</div>
+        <div class="concert-genre">${esc(k.genre)}</div>
+        <h3>${esc(k.title)}</h3>
+        ${k.desc ? `<div class="concert-desc">${esc(k.desc)}</div>` : ''}
+        <div class="concert-footer">
+          <div class="concert-venue">${pinSVG} ${esc(k.venue)}</div>
+          ${k.ticket ? `<span class="ticket-btn" style="pointer-events:none;">🎟️ Tickets</span>` : ''}
+        </div>
+        <div class="card-tap-hint">Antippen für Details →</div>
+      </div>`).join('');
   }
 
+  // ════════════════════════════════════
+  // HASH-ROUTING
+  // ════════════════════════════════════
+  function navigateTo(id) { window.location.hash = `/konzert/${+id}`; }
+  function getHashId() { const m = window.location.hash.match(/^#\/konzert\/(\d+)$/); return m ? parseInt(m[1],10) : null; }
+  async function handleHash() { const id = getHashId(); if (id !== null) await openModal(id); else closeModal(false); }
   window.addEventListener('hashchange', handleHash);
   window.addEventListener('load', handleHash);
 
-  // ── MODAL öffnen ──
-  function openModal(id) {
-    const list = loadKonzerte();
+  // ── MODAL ──
+  async function openModal(id) {
+    const list = await loadKonzerte();
     const k = list.find(x => x.id === id);
     if (!k) { window.location.hash = ''; return; }
-
-    const defaultImgs = [
-      'https://images.pexels.com/photos/1190297/pexels-photo-1190297.jpeg?auto=compress&cs=tinysrgb&w=600',
-      'https://images.pexels.com/photos/1763075/pexels-photo-1763075.jpeg?auto=compress&cs=tinysrgb&w=600',
-      'https://images.pexels.com/photos/1105666/pexels-photo-1105666.jpeg?auto=compress&cs=tinysrgb&w=600',
-    ];
-    const imgSrc = k.img || defaultImgs[id % 3];
-
-    // Meta-Tags für Social-Sharing aktualisieren
+    const fallback = ['https://images.pexels.com/photos/1190297/pexels-photo-1190297.jpeg?auto=compress&cs=tinysrgb&w=600','https://images.pexels.com/photos/1763075/pexels-photo-1763075.jpeg?auto=compress&cs=tinysrgb&w=600','https://images.pexels.com/photos/1105666/pexels-photo-1105666.jpeg?auto=compress&cs=tinysrgb&w=600'];
+    const imgSrc = k.img || fallback[id % 3];
     document.title = `${k.title} — Sihltal Session`;
     setMeta('og:title', k.title);
     setMeta('og:description', k.desc || `${k.genre} · ${formatDateDE(k.date)} · ${k.venue}`);
-    if (imgSrc) setMeta('og:image', imgSrc);
-
-    // Bild
-    document.getElementById('modalImgWrap').innerHTML = imgSrc
-      ? `<img class="modal-img" src="${imgSrc}" alt="${k.title}">`
-      : `<div class="modal-img-placeholder">🎵</div>`;
-
-    document.getElementById('modalFeatured').innerHTML = k.featured
-      ? `<span class="modal-featured">⭐ Featured</span>` : '';
+    if (imgSrc && !imgSrc.startsWith('data:')) setMeta('og:image', imgSrc);
+    document.getElementById('modalImgWrap').innerHTML = imgSrc ? `<img class="modal-img" src="${esc(imgSrc)}" alt="${esc(k.title)}">` : `<div class="modal-img-placeholder">🎵</div>`;
+    document.getElementById('modalFeatured').innerHTML = k.featured ? `<span class="modal-featured">⭐ Featured</span>` : '';
     document.getElementById('modalDate').textContent = formatDateDE(k.date);
     document.getElementById('modalTitle').textContent = k.title;
     document.getElementById('modalGenre').textContent = k.genre;
-
     document.getElementById('modalMeta').innerHTML = `
-      <div class="modal-meta-row">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-        ${k.venue}
-      </div>
-      <div class="modal-meta-row">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        ${formatDateDE(k.date)}
-      </div>`;
-
-    document.getElementById('modalDesc').innerHTML = k.desc
-      ? k.desc
-      : '<em style="opacity:0.4">Keine Beschreibung vorhanden.</em>';
-
-    document.getElementById('modalTicket').innerHTML = k.ticket
-      ? `<a class="modal-ticket-btn" href="${k.ticket}" target="_blank" rel="noopener">🎟️ Jetzt Tickets kaufen</a>`
+      <div class="modal-meta-row"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>${esc(k.venue)}</div>
+      <div class="modal-meta-row"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${formatDateDE(k.date)}</div>`;
+    document.getElementById('modalDesc').textContent = k.desc || '';
+    if (!k.desc) document.getElementById('modalDesc').innerHTML = '<em style="opacity:0.4">Keine Beschreibung vorhanden.</em>';
+    const safeTicket = k.ticket ? safeUrl(k.ticket) : '';
+    document.getElementById('modalTicket').innerHTML = safeTicket
+      ? `<a class="modal-ticket-btn" href="${esc(safeTicket)}" target="_blank" rel="noopener noreferrer">🎟️ Jetzt Tickets kaufen</a>`
       : `<div class="modal-no-ticket">Keine Online-Tickets — Eintritt an der Abendkasse</div>`;
-
-    // Share-Bereich
     const shareUrl = window.location.origin + window.location.pathname + `#/konzert/${k.id}`;
     const shareText = `${k.title} — ${formatDateDE(k.date)}, ${k.venue}`;
-    let shareHtml = `<button class="modal-share-btn" id="copyLinkBtn" onclick="copyLink('${shareUrl}')">🔗 Link kopieren</button>`;
-    if (navigator.share) {
-      shareHtml += `<button class="modal-share-btn" onclick="nativeShare('${shareUrl}','${shareText.replace(/'/g,"\\'")}')">📤 Teilen</button>`;
-    }
+    let shareHtml = `<button class="modal-share-btn" id="copyLinkBtn" onclick="copyLink('${esc(shareUrl)}')">🔗 Link kopieren</button>`;
+    if (navigator.share) shareHtml += `<button class="modal-share-btn" onclick="nativeShare()">📤 Teilen</button>`;
     document.getElementById('modalShare').innerHTML = shareHtml;
-
+    document.getElementById('modalShare').dataset.shareUrl = shareUrl;
+    document.getElementById('modalShare').dataset.shareText = shareText;
     const modal = document.getElementById('konzertModal');
     modal.classList.add('open');
     document.body.style.overflow = 'hidden';
     modal.querySelector('.modal-box').scrollTop = 0;
   }
 
-  function setMeta(property, content) {
-    let el = document.querySelector(`meta[property="${property}"]`);
-    if (!el) { el = document.createElement('meta'); el.setAttribute('property', property); document.head.appendChild(el); }
-    el.setAttribute('content', content);
-  }
+  function setMeta(p, c) { let el = document.querySelector(`meta[property="${p}"]`); if (!el) { el = document.createElement('meta'); el.setAttribute('property', p); document.head.appendChild(el); } el.setAttribute('content', c); }
 
-  // ── MODAL schliessen ──
   function closeModal(updateHash = true) {
     const modal = document.getElementById('konzertModal');
     if (!modal.classList.contains('open')) return;
     modal.classList.remove('open');
     document.body.style.overflow = '';
     document.title = 'Sihltal Session — Musik im Tal';
-    if (updateHash) {
-      history.pushState('', document.title, window.location.pathname + window.location.search);
-    }
+    if (updateHash) history.pushState('', document.title, window.location.pathname + window.location.search);
   }
-
-  // ── Link kopieren ──
-  function copyLink(url) {
-    navigator.clipboard.writeText(url).then(() => {
-      const btn = document.getElementById('copyLinkBtn');
-      if (btn) { btn.textContent = '✅ Kopiert!'; btn.classList.add('copied'); setTimeout(() => { btn.textContent = '🔗 Link kopieren'; btn.classList.remove('copied'); }, 2500); }
-    });
-  }
-
-  // ── Native Share (iOS/Android) ──
-  function nativeShare(url, text) {
-    navigator.share({ title: document.getElementById('modalTitle').textContent, text, url }).catch(() => {});
-  }
-
-  // ESC zum Schliessen
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') closeModal();
-  });
-
-  renderConcerts();
+  function copyLink(url) { navigator.clipboard.writeText(url).then(() => { const b = document.getElementById('copyLinkBtn'); if(b){b.textContent='✅ Kopiert!';b.classList.add('copied');setTimeout(()=>{b.textContent='🔗 Link kopieren';b.classList.remove('copied');},2500);} }); }
+  function nativeShare() { const el = document.getElementById('modalShare'); navigator.share({ title: document.getElementById('modalTitle').textContent, text: el.dataset.shareText, url: el.dataset.shareUrl }).catch(()=>{}); }
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
   // ════════════════════════════════════
-  // ARCHIV — Vergangene Konzerte
+  // ARCHIV
   // ════════════════════════════════════
-  let archivGenre = 'alle';
-  let archivSort = 'datum-neu';
+  let archivGenre = 'alle', archivSort = 'datum-neu';
+  function isPast(d) { const t = new Date(); t.setHours(0,0,0,0); return new Date(d) < t; }
+  async function getPastKonzerte() { return (await loadKonzerte()).filter(k => isPast(k.date)); }
 
-  function isPast(dateStr) {
-    if (!dateStr) return false;
-    const today = new Date();
-    today.setHours(0,0,0,0);
-    const d = new Date(dateStr);
-    return d < today;
-  }
-
-  function getPastKonzerte() {
-    return loadKonzerte().filter(k => isPast(k.date));
-  }
-
-  function getGenres() {
+  async function renderArchivFilters() {
+    const past = await getPastKonzerte();
     const genres = new Set();
-    getPastKonzerte().forEach(k => {
-      k.genre.split(/[·,\/]/).forEach(g => {
-        const t = g.trim();
-        if (t) genres.add(t);
-      });
-    });
-    return [...genres].sort();
-  }
-
-  function renderArchivFilters() {
-    const genres = getGenres();
+    past.forEach(k => k.genre.split(/[·,\/]/).forEach(g => { const t = g.trim(); if(t) genres.add(t); }));
     const container = document.getElementById('archivGenreFilters');
     if (!container) return;
-    const allActive = archivGenre === 'alle' ? ' active' : '';
-    container.innerHTML = `<button class="filter-btn${allActive}" data-genre="alle" onclick="setGenreFilter('alle')">Alle</button>`
-      + genres.map(g => {
-          const active = archivGenre === g ? ' active' : '';
-          return `<button class="filter-btn${active}" data-genre="${g}" onclick="setGenreFilter('${g.replace(/'/g,"\\'")}')">${g}</button>`;
-        }).join('');
+    container.innerHTML = `<button class="filter-btn${archivGenre==='alle'?' active':''}" onclick="setGenreFilter('alle')">Alle</button>`
+      + [...genres].sort().map(g => `<button class="filter-btn${archivGenre===g?' active':''}" onclick="setGenreFilter('${esc(g)}')">${esc(g)}</button>`).join('');
   }
+  function setGenreFilter(g) { archivGenre = g; renderArchivFilters(); renderArchiv(); }
+  function setSort(s) { archivSort = s; document.querySelectorAll('.sort-btn').forEach(b => b.classList.toggle('active', b.dataset.sort===s)); renderArchiv(); }
 
-  function setGenreFilter(genre) {
-    archivGenre = genre;
-    renderArchivFilters();
-    renderArchiv();
-  }
-
-  function setSort(sort) {
-    archivSort = sort;
-    document.querySelectorAll('.sort-btn').forEach(b => b.classList.toggle('active', b.dataset.sort === sort));
-    renderArchiv();
-  }
-
-  function renderArchiv() {
-    let list = getPastKonzerte();
-    if (archivGenre !== 'alle') {
-      list = list.filter(k => k.genre.toLowerCase().includes(archivGenre.toLowerCase()));
-    }
-    if (archivSort === 'datum-neu') list.sort((a,b) => b.date.localeCompare(a.date));
-    else if (archivSort === 'datum-alt') list.sort((a,b) => a.date.localeCompare(b.date));
-    else if (archivSort === 'name') list.sort((a,b) => a.title.localeCompare(b.title, 'de'));
-
+  async function renderArchiv() {
+    let list = await getPastKonzerte();
+    if (archivGenre !== 'alle') list = list.filter(k => k.genre.toLowerCase().includes(archivGenre.toLowerCase()));
+    if (archivSort==='datum-neu') list.sort((a,b)=>b.date.localeCompare(a.date));
+    else if (archivSort==='datum-alt') list.sort((a,b)=>a.date.localeCompare(b.date));
+    else if (archivSort==='name') list.sort((a,b)=>a.title.localeCompare(b.title,'de'));
     const grid = document.getElementById('archivGrid');
     const empty = document.getElementById('archivEmpty');
     if (!grid) return;
-
-    if (list.length === 0) {
-      grid.innerHTML = '';
-      grid.style.display = 'none';
-      empty.style.display = 'block';
-      return;
-    }
-    grid.style.display = 'grid';
-    empty.style.display = 'none';
-
+    if (list.length === 0) { grid.innerHTML=''; grid.style.display='none'; empty.style.display='block'; return; }
+    grid.style.display='grid'; empty.style.display='none';
     const pinSVG = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>`;
-    const defaultImgs = [
-      'https://images.pexels.com/photos/1190297/pexels-photo-1190297.jpeg?auto=compress&cs=tinysrgb&w=600',
-      'https://images.pexels.com/photos/1763075/pexels-photo-1763075.jpeg?auto=compress&cs=tinysrgb&w=600',
-      'https://images.pexels.com/photos/1105666/pexels-photo-1105666.jpeg?auto=compress&cs=tinysrgb&w=600',
-    ];
-
-    grid.innerHTML = list.map((k, i) => {
-      const img = k.img || defaultImgs[i % 3];
-      return `
-        <div class="archiv-card" onclick="navigateTo(${k.id})" role="button" tabindex="0"
-          onkeydown="if(event.key==='Enter'||event.key===' ')navigateTo(${k.id})">
-          <span class="archiv-past-label">Vergangen</span>
-          <img class="archiv-card-img" src="${img}" alt="${k.title}" loading="lazy">
-          <div class="archiv-card-body">
-            <div class="archiv-card-date">${formatDateDE(k.date)}</div>
-            <div class="archiv-card-title">${k.title}</div>
-            <div class="archiv-card-genre">${k.genre}</div>
-            <div class="archiv-card-venue">${pinSVG} ${k.venue}</div>
-          </div>
-        </div>`;
-    }).join('');
-
-    grid.querySelectorAll('.archiv-card').forEach((el, i) => {
-      el.style.transitionDelay = `${i * 40}ms`;
-      requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('visible')));
-    });
+    const fallback=['https://images.pexels.com/photos/1190297/pexels-photo-1190297.jpeg?auto=compress&cs=tinysrgb&w=600','https://images.pexels.com/photos/1763075/pexels-photo-1763075.jpeg?auto=compress&cs=tinysrgb&w=600','https://images.pexels.com/photos/1105666/pexels-photo-1105666.jpeg?auto=compress&cs=tinysrgb&w=600'];
+    grid.innerHTML = list.map((k,i) => `
+      <div class="archiv-card" onclick="navigateTo(${+k.id})" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')navigateTo(${+k.id})">
+        <span class="archiv-past-label">Vergangen</span>
+        <img class="archiv-card-img" src="${esc(k.img||fallback[i%3])}" alt="${esc(k.title)}" loading="lazy">
+        <div class="archiv-card-body">
+          <div class="archiv-card-date">${formatDateDE(k.date)}</div>
+          <div class="archiv-card-title">${esc(k.title)}</div>
+          <div class="archiv-card-genre">${esc(k.genre)}</div>
+          <div class="archiv-card-venue">${pinSVG} ${esc(k.venue)}</div>
+        </div>
+      </div>`).join('');
+    grid.querySelectorAll('.archiv-card').forEach((el,i) => { el.style.transitionDelay=`${i*40}ms`; requestAnimationFrame(()=>requestAnimationFrame(()=>el.classList.add('visible'))); });
   }
 
-  renderArchivFilters();
-  renderArchiv();
+  // ── INIT ──
+  renderConcerts().then(() => { renderArchivFilters(); renderArchiv(); });
 
   // ════════════════════════════════════
-  // ADMIN LOGIK
+  // ADMIN — Login via Supabase Auth
+  // Kein Passwort im Code — Supabase prüft es serverseitig
   // ════════════════════════════════════
   let adminLoggedIn = false;
   let editingId = null;
-  let footerClickCount = 0;
-  let footerClickTimer = null;
+  let currentImgBase64 = null;
+  let loginAttempts = 0;
+  let loginLocked = false;
+  let footerClickCount = 0, footerClickTimer = null;
 
+  // Geheimer Zugang: 5× Footer-Copyright klicken
   document.getElementById('footerCopyright').addEventListener('click', () => {
     footerClickCount++;
     clearTimeout(footerClickTimer);
@@ -1925,204 +1802,179 @@
     document.body.style.overflow = 'hidden';
     if (adminLoggedIn) showDashboard();
     else { document.getElementById('adminLogin').style.display = 'flex'; document.getElementById('adminDashboard').style.display = 'none'; }
-    setTimeout(() => document.getElementById('adminPwInput') && document.getElementById('adminPwInput').focus(), 100);
+    setTimeout(() => !loginLocked && document.getElementById('adminPwInput')?.focus(), 150);
   }
+  function closeAdmin() { document.getElementById('adminOverlay').style.display = 'none'; document.body.style.overflow = ''; }
 
-  function closeAdmin() {
-    document.getElementById('adminOverlay').style.display = 'none';
-    document.body.style.overflow = '';
-  }
-
-  function adminLogin() {
+  async function adminLogin() {
+    if (loginLocked) return;
+    const email = document.getElementById('adminEmailInput').value.trim();
     const pw = document.getElementById('adminPwInput').value;
-    if (pw === ADMIN_PW) {
+    if (!pw) return;
+    const btn = document.querySelector('button[onclick="adminLogin()"]');
+    btn.textContent = 'Prüfe…'; btn.disabled = true;
+    document.getElementById('adminPwInput').disabled = true;
+    document.getElementById('loginError').style.display = 'none';
+
+    const { data, error } = await sb.auth.signInWithPassword({ email, password: pw });
+
+    if (!error && data.session) {
+      loginAttempts = 0;
       adminLoggedIn = true;
-      document.getElementById('loginError').style.display = 'none';
       document.getElementById('adminPwInput').value = '';
+      document.getElementById('adminEmailInput').value = '';
       showDashboard();
     } else {
-      document.getElementById('loginError').style.display = 'block';
+      loginAttempts++;
       document.getElementById('adminPwInput').value = '';
-      document.getElementById('adminPwInput').focus();
+      if (loginAttempts >= 5) {
+        lockLogin();
+      } else {
+        const rem = 5 - loginAttempts;
+        document.getElementById('loginError').textContent = `❌ Falsches Passwort. Noch ${rem} Versuch${rem===1?'':'e'}.`;
+        document.getElementById('loginError').style.display = 'block';
+      }
     }
+    if (!loginLocked) { btn.textContent = 'Einloggen'; btn.disabled = false; document.getElementById('adminPwInput').disabled = false; document.getElementById('adminPwInput').focus(); }
   }
 
-  function adminLogout() { adminLoggedIn = false; closeAdmin(); }
+  function lockLogin() {
+    loginLocked = true;
+    document.getElementById('adminPwInput').disabled = true;
+    const btn = document.querySelector('button[onclick="adminLogin()"]');
+    if (btn) { btn.textContent = '🔒 Gesperrt'; btn.disabled = true; }
+    let s = 60;
+    (function tick() {
+      document.getElementById('loginError').textContent = `🔒 Zu viele Fehlversuche. Bitte ${s} Sekunden warten.`;
+      document.getElementById('loginError').style.display = 'block';
+      if (s-- > 0) setTimeout(tick, 1000);
+      else { loginLocked = false; loginAttempts = 0; document.getElementById('adminPwInput').disabled = false; document.getElementById('loginError').style.display = 'none'; if (btn) { btn.textContent = 'Einloggen'; btn.disabled = false; } document.getElementById('adminPwInput').focus(); }
+    })();
+  }
 
-  function showDashboard() {
+  async function adminLogout() { await sb.auth.signOut(); adminLoggedIn = false; closeAdmin(); }
+
+  async function showDashboard() {
     document.getElementById('adminLogin').style.display = 'none';
     document.getElementById('adminDashboard').style.display = 'block';
-    renderAdminList();
+    await renderAdminList();
   }
 
-  // ── Bild-Upload Handling ──
-  function handleImgSelect(input) {
-    const file = input.files[0];
-    if (!file) return;
-    processImgFile(file);
-  }
-
-  function handleImgDrop(event) {
-    event.preventDefault();
-    document.getElementById('imgUploadArea').style.borderColor = 'rgba(201,168,76,0.35)';
-    document.getElementById('imgUploadArea').style.background = 'transparent';
-    const file = event.dataTransfer.files[0];
-    if (file && file.type.startsWith('image/')) processImgFile(file);
-  }
-
+  // ── Bild-Upload ──
+  function handleImgSelect(input) { const f = input.files[0]; if (f) processImgFile(f); }
+  function handleImgDrop(event) { event.preventDefault(); document.getElementById('imgUploadArea').style.borderColor='rgba(201,168,76,0.35)'; document.getElementById('imgUploadArea').style.background='transparent'; const f=event.dataTransfer.files[0]; if(f&&f.type.startsWith('image/'))processImgFile(f); }
   function processImgFile(file) {
-    if (file.size > 5 * 1024 * 1024) {
-      alert('⚠️ Das Bild ist zu gross (max. 5 MB). Bitte ein kleineres Bild wählen.');
-      return;
-    }
+    if (file.size > 3*1024*1024) { alert('⚠️ Das Bild ist zu gross (max. 3 MB). Bitte ein kleineres wählen.'); return; }
     const reader = new FileReader();
-    reader.onload = (e) => {
-      currentImgBase64 = e.target.result;
-      document.getElementById('imgPreview').src = currentImgBase64;
-      document.getElementById('imgPreview').style.display = 'block';
-      document.getElementById('imgUploadContent').style.display = 'none';
-      document.getElementById('removeImgBtn').style.display = 'inline-block';
-    };
+    reader.onload = e => { currentImgBase64 = e.target.result; document.getElementById('imgPreview').src = currentImgBase64; document.getElementById('imgPreview').style.display='block'; document.getElementById('imgUploadContent').style.display='none'; document.getElementById('removeImgBtn').style.display='inline-block'; };
     reader.readAsDataURL(file);
   }
+  function removeImg() { currentImgBase64=null; document.getElementById('imgPreview').src=''; document.getElementById('imgPreview').style.display='none'; document.getElementById('imgUploadContent').style.display='block'; document.getElementById('removeImgBtn').style.display='none'; document.getElementById('f_imgFile').value=''; }
 
-  function removeImg() {
-    currentImgBase64 = null;
-    document.getElementById('imgPreview').src = '';
-    document.getElementById('imgPreview').style.display = 'none';
-    document.getElementById('imgUploadContent').style.display = 'block';
-    document.getElementById('removeImgBtn').style.display = 'none';
-    document.getElementById('f_imgFile').value = '';
-  }
-
-  // ── Admin-Liste rendern ──
-  function renderAdminList() {
-    const list = loadKonzerte();
-    list.sort((a,b) => a.date.localeCompare(b.date));
+  // ── Admin-Liste ──
+  async function renderAdminList() {
+    const list = await loadKonzerte();
     const el = document.getElementById('adminKonzertList');
-    if (list.length === 0) {
-      el.innerHTML = '<div class="empty-state">📭 Noch keine Konzerte vorhanden. Füge dein erstes Konzert hinzu!</div>';
-      return;
-    }
+    if (list.length === 0) { el.innerHTML='<div class="empty-state">📭 Noch keine Konzerte. Füge das erste hinzu!</div>'; return; }
+    list.sort((a,b)=>a.date.localeCompare(b.date));
     el.innerHTML = list.map(k => `
       <div class="admin-konzert-row">
-        <div style="width:64px; height:54px; border-radius:4px; overflow:hidden; flex-shrink:0; background:#222; display:flex; align-items:center; justify-content:center;">
-          ${k.img ? `<img src="${k.img}" style="width:100%; height:100%; object-fit:cover;" onerror="this.style.display='none'">` : '<span style="font-size:1.5rem;">🎵</span>'}
+        <div style="width:64px;height:54px;border-radius:4px;overflow:hidden;flex-shrink:0;background:#222;display:flex;align-items:center;justify-content:center;">
+          ${k.img?`<img src="${esc(k.img)}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">`:'<span style="font-size:1.5rem;">🎵</span>'}
         </div>
         <div class="admin-k-info">
-          <div class="admin-k-title">${k.featured ? '⭐ ' : ''}${k.title}</div>
-          <div class="admin-k-meta">📅 ${formatDateDE(k.date)} &nbsp;·&nbsp; 🎸 ${k.genre} &nbsp;·&nbsp; 📍 ${k.venue}</div>
-          ${k.ticket ? `<div style="font-size:0.8rem; color:rgba(201,168,76,0.7); margin-top:0.2rem;">🎟️ Ticket-Link vorhanden</div>` : ''}
+          <div class="admin-k-title">${k.featured?'⭐ ':''}${esc(k.title)}</div>
+          <div class="admin-k-meta">📅 ${formatDateDE(k.date)} · 🎸 ${esc(k.genre)} · 📍 ${esc(k.venue)}</div>
+          ${k.ticket?`<div style="font-size:0.8rem;color:rgba(201,168,76,0.7);margin-top:0.2rem;">🎟️ Ticket-Link vorhanden</div>`:''}
         </div>
         <div class="admin-k-actions">
-          <button class="btn-edit" onclick="editKonzert(${k.id})">✏️ Bearbeiten</button>
-          <button class="btn-del" onclick="deleteKonzert(${k.id})">🗑️ Löschen</button>
+          <button class="btn-edit" onclick="editKonzert(${+k.id})">✏️ Bearbeiten</button>
+          <button class="btn-del" onclick="deleteKonzert(${+k.id})">🗑️ Löschen</button>
         </div>
-      </div>
-    `).join('');
+      </div>`).join('');
   }
 
-  // ── Formular zurücksetzen ──
   function resetForm() {
-    editingId = null;
-    currentImgBase64 = null;
-    document.getElementById('formTitle').innerHTML = '➕ Neues Konzert hinzufügen';
-    document.getElementById('f_title').value = '';
-    document.getElementById('f_date').value = '';
-    document.getElementById('f_genre').value = '';
-    document.getElementById('f_venue').value = '';
-    document.getElementById('f_desc').value = '';
-    document.getElementById('f_ticket').value = '';
-    document.getElementById('f_imgFile').value = '';
-    document.getElementById('f_featured').checked = false;
-    document.getElementById('formError').style.display = 'none';
-    document.getElementById('imgPreview').style.display = 'none';
-    document.getElementById('imgPreview').src = '';
-    document.getElementById('imgUploadContent').style.display = 'block';
-    document.getElementById('removeImgBtn').style.display = 'none';
-    document.getElementById('adminOverlay').scrollTo({ top: 0, behavior: 'smooth' });
-    setTimeout(() => document.getElementById('f_title').focus(), 300);
+    editingId=null; currentImgBase64=null;
+    document.getElementById('formTitle').innerHTML='➕ Neues Konzert hinzufügen';
+    ['f_title','f_date','f_genre','f_venue','f_desc','f_ticket','f_imgFile'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('f_featured').checked=false;
+    document.getElementById('formError').style.display='none';
+    document.getElementById('imgPreview').style.display='none'; document.getElementById('imgPreview').src='';
+    document.getElementById('imgUploadContent').style.display='block'; document.getElementById('removeImgBtn').style.display='none';
+    document.getElementById('adminOverlay').scrollTo({top:0,behavior:'smooth'});
+    setTimeout(()=>document.getElementById('f_title').focus(),300);
   }
 
-  // ── Konzert bearbeiten ──
-  function editKonzert(id) {
-    const list = loadKonzerte();
-    const k = list.find(x => x.id === id);
+  async function editKonzert(id) {
+    const list = await loadKonzerte();
+    const k = list.find(x=>x.id===id);
     if (!k) return;
-    editingId = id;
-    document.getElementById('formTitle').innerHTML = '✏️ Konzert bearbeiten';
-    document.getElementById('f_title').value = k.title;
-    document.getElementById('f_date').value = k.date;
-    document.getElementById('f_genre').value = k.genre;
-    document.getElementById('f_venue').value = k.venue;
-    document.getElementById('f_desc').value = k.desc || '';
-    document.getElementById('f_ticket').value = k.ticket || '';
-    document.getElementById('f_featured').checked = k.featured || false;
-    // Bild-Vorschau
-    if (k.img) {
-      currentImgBase64 = k.img;
-      document.getElementById('imgPreview').src = k.img;
-      document.getElementById('imgPreview').style.display = 'block';
-      document.getElementById('imgUploadContent').style.display = 'none';
-      document.getElementById('removeImgBtn').style.display = 'inline-block';
-    } else {
-      removeImg();
-    }
-    document.getElementById('adminOverlay').scrollTo({ top: 0, behavior: 'smooth' });
-    setTimeout(() => document.getElementById('f_title').focus(), 300);
+    editingId=id;
+    document.getElementById('formTitle').innerHTML='✏️ Konzert bearbeiten';
+    document.getElementById('f_title').value=k.title;
+    document.getElementById('f_date').value=k.date;
+    document.getElementById('f_genre').value=k.genre;
+    document.getElementById('f_venue').value=k.venue;
+    document.getElementById('f_desc').value=k.desc||'';
+    document.getElementById('f_ticket').value=k.ticket||'';
+    document.getElementById('f_featured').checked=!!k.featured;
+    if (k.img) { currentImgBase64=k.img; document.getElementById('imgPreview').src=k.img; document.getElementById('imgPreview').style.display='block'; document.getElementById('imgUploadContent').style.display='none'; document.getElementById('removeImgBtn').style.display='inline-block'; }
+    else removeImg();
+    document.getElementById('adminOverlay').scrollTo({top:0,behavior:'smooth'});
+    setTimeout(()=>document.getElementById('f_title').focus(),300);
   }
 
-  // ── Konzert löschen ──
-  function deleteKonzert(id) {
-    const list = loadKonzerte();
-    const k = list.find(x => x.id === id);
-    if (!k) return;
-    if (!confirm(`Konzert wirklich löschen?\n\n"${k.title}"\n\nDies kann nicht rückgängig gemacht werden.`)) return;
-    saveKonzerteToStorage(list.filter(x => x.id !== id));
-    renderAdminList();
-    renderConcerts();
-    renderArchivFilters();
-    renderArchiv();
+  async function deleteKonzert(id) {
+    if (!adminLoggedIn) return;
+    const list = await loadKonzerte();
+    const k = list.find(x=>x.id===id);
+    if (!k || !confirm(`Konzert wirklich löschen?\n\n"${k.title}"\n\nDies kann nicht rückgängig gemacht werden.`)) return;
+    const { error } = await sb.from('konzerte').delete().eq('id', id);
+    if (error) { alert('❌ Fehler beim Löschen: ' + error.message); return; }
+    invalidateCache();
+    await renderAdminList();
+    await renderConcerts();
+    await renderArchivFilters();
+    await renderArchiv();
   }
 
-  // ── Konzert speichern ──
-  function saveKonzert() {
-    const title  = document.getElementById('f_title').value.trim();
-    const date   = document.getElementById('f_date').value.trim();
-    const genre  = document.getElementById('f_genre').value.trim();
-    const venue  = document.getElementById('f_venue').value.trim();
-    const desc   = document.getElementById('f_desc').value.trim();
-    const ticket = document.getElementById('f_ticket').value.trim();
+  async function saveKonzert() {
+    if (!adminLoggedIn) { alert('Bitte zuerst einloggen.'); return; }
+    const title   = document.getElementById('f_title').value.trim().slice(0,200);
+    const date    = document.getElementById('f_date').value.trim();
+    const genre   = document.getElementById('f_genre').value.trim().slice(0,100);
+    const venue   = document.getElementById('f_venue').value.trim().slice(0,200);
+    const desc    = document.getElementById('f_desc').value.trim().slice(0,2000);
+    const ticketRaw = document.getElementById('f_ticket').value.trim();
+    const ticket  = ticketRaw ? safeUrl(ticketRaw) : '';
     const featured = document.getElementById('f_featured').checked;
-    const errEl  = document.getElementById('formError');
+    const errEl   = document.getElementById('formError');
+    if (!title||!date||!genre||!venue) { errEl.textContent='⚠️ Bitte alle Pflichtfelder ausfüllen.'; errEl.style.display='block'; errEl.scrollIntoView({behavior:'smooth',block:'center'}); return; }
+    if (ticketRaw && !ticket) { errEl.textContent='⚠️ Ticket-Link muss mit https:// beginnen.'; errEl.style.display='block'; return; }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) { errEl.textContent='⚠️ Ungültiges Datum.'; errEl.style.display='block'; return; }
+    errEl.style.display='none';
 
-    if (!title || !date || !genre || !venue) {
-      errEl.textContent = '⚠️ Bitte alle Pflichtfelder ausfüllen (Name, Datum, Musikrichtung, Ort).';
-      errEl.style.display = 'block';
-      errEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      return;
-    }
-    errEl.style.display = 'none';
-
-    const imgData = currentImgBase64 || '';
-    let list = loadKonzerte();
+    const row = { title, date, genre, venue, description: desc, ticket_url: ticket, featured, img: currentImgBase64||null };
+    let dbError;
     if (editingId !== null) {
-      list = list.map(k => k.id === editingId ? { ...k, title, date, genre, venue, desc, ticket, featured, img: imgData } : k);
+      const { error } = await sb.from('konzerte').update(row).eq('id', editingId);
+      dbError = error;
     } else {
-      const newId = list.length > 0 ? Math.max(...list.map(k => k.id)) + 1 : 1;
-      list.push({ id: newId, title, date, genre, venue, desc, ticket, featured, img: imgData });
+      const { error } = await sb.from('konzerte').insert(row);
+      dbError = error;
     }
-    saveKonzerteToStorage(list);
-    renderAdminList();
-    renderConcerts();
-    renderArchivFilters();
-    renderArchiv();
+    if (dbError) { errEl.textContent='❌ Fehler beim Speichern: ' + dbError.message; errEl.style.display='block'; return; }
+    invalidateCache();
+    await renderAdminList();
+    await renderConcerts();
+    await renderArchivFilters();
+    await renderArchiv();
     resetForm();
     const btn = document.querySelector('button[onclick="saveKonzert()"]');
     const orig = btn.textContent;
-    btn.textContent = '✅ Gespeichert!';
-    btn.style.background = '#4caf7d';
-    setTimeout(() => { btn.textContent = orig; btn.style.background = '#c9a84c'; }, 2500);
+    btn.textContent='✅ Gespeichert!'; btn.style.background='#4caf7d';
+    setTimeout(()=>{ btn.textContent=orig; btn.style.background='#c9a84c'; }, 2500);
   }
 </script>
 </body>
